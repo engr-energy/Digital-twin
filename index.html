@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FYP Digital Twin v2 — Low-Head Hydropower, KP Irrigation Network</title>
+<title>FYP Digital Twin v2.1 — Low-Head Hydropower, KP Irrigation Network</title>
 <style>
 :root{--bg:#eef3f1;--panel:#fff;--panel2:#f4f8f6;--ink:#12211c;--ink2:#3d554c;--mut:#63766e;--line:#cfded7;--water:#0e7d8c;--water-d:#0a5f6b;--accent:#e07b24;--ok:#177a46;--ok-bg:#e2f3e8;--bad:#b3372e;--bad-bg:#fbe9e6;--warn:#96660a;--warn-bg:#fbf0d3;--chip:#e7efeb;--radius:14px}
 *{box-sizing:border-box}
@@ -73,13 +73,16 @@ tr.rej{opacity:.75}
 .monthgrid input{width:100%;padding:4px 6px}
 @media(max-width:760px){.monthgrid{grid-template-columns:repeat(3,1fr)}}
 footer{color:var(--mut);font-size:13px;margin-top:24px}
+.reportbtns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#printReport{display:none}
+@media print{body{background:#fff}.wrap,footer{display:none!important}#printReport{display:block!important;color:#000;font-size:12px}#printReport table{border-collapse:collapse;width:100%;margin:8px 0}#printReport th,#printReport td{border:1px solid #999;padding:4px 6px;text-align:left;font-size:11px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="hero">
-<p class="kicker">Final-Year Project &middot; UET Peshawar &middot; Digital Twin v2</p>
+<p class="kicker">Final-Year Project &middot; UET Peshawar &middot; Digital Twin v2.1</p>
 <h1>Low-Head Hydropower <span class="thin">from the KP Irrigation Network</span></h1>
 <p class="lede">A working twin of 21 canal reaches — 10 Lower Swat, 11 Kabul River — with a real turbine library, efficiency as a curve, net head after losses, and a full year of seasons. Every output is a <b>scenario</b> until sourced heads arrive. That honesty is the point.</p>
 <div class="chips">
@@ -267,6 +270,20 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <tr><th>Cost per annual kWh (LCOE, planning)</th><td class="num"><span id="ecoLCOE">—</span></td></tr>
 </table>
 <p class="small">Capital = rated kW × PKR/kW (input above). LCOE = (capital ÷ life + O&amp;M) ÷ annual kWh. All ILLUSTRATIVE planning numbers.</p>
+</section>
+
+<section class="panel" aria-labelledby="repH">
+<h2 id="repH">Download report — this test condition</h2>
+<p>Generates a report for the test condition you have set above — system, reach, turbine, head, flow and season — in the format you choose. Nothing is uploaded; the file is made in your browser.</p>
+<p><label>Report covers <select id="reportScope"><option value="reach">Selected reach only</option><option value="system" selected>All reaches in the current system (ranking)</option></select></label></p>
+<div class="reportbtns">
+<button class="btn" id="btnXls" type="button">Download Excel (.xls)</button>
+<button class="btn" id="btnCsv" type="button">Download Excel (.csv)</button>
+<button class="btn" id="btnPdf" type="button">Download / print PDF</button>
+<button class="btn ghost" id="btnJson" type="button">Download data (.json)</button>
+</div>
+<p class="small" id="reportStatus">PDF uses your browser's Print &rarr; Save as PDF, so the PDF looks exactly like the on-screen report. The .xls file opens in Excel, LibreOffice and Google Sheets; .csv is the same data in plain text.</p>
+<p class="small">The report states the test condition, the result, and the honesty limits: heads are ASSUMED until sourced, turbine curves are typical values, and system totals are upper bounds, not additive generation.</p>
 </section>
 
 <section class="panel" aria-labelledby="honH">
@@ -690,12 +707,126 @@ function init(){
     out.push("5. Same reach, Kaplan curve mode (η 0.90 × ηgen 0.94 = 0.846): "+c5.kw.toFixed(1)+" kW — higher than the flat-75% check, as expected; the difference is the turbine curve + generator, not an error.");
     $("checkResults").innerHTML=out.join("<br/>");
   });
+  $("btnXls").addEventListener("click", function(){ var r=collectReport(); downloadBlob(reportFileBase()+".xls", buildXls(r), "application/vnd.ms-excel"); $("reportStatus").textContent="Excel (.xls) report downloaded: "+reportFileBase()+".xls — "+r.selected.name+", "+r.selected.powerKw+" kW, "+r.selected.annualMWh+" MWh/yr."; });
+  $("btnCsv").addEventListener("click", function(){ var r=collectReport(); downloadBlob(reportFileBase()+".csv", buildCsv(r), "text/csv"); $("reportStatus").textContent="Excel (.csv) report downloaded: "+reportFileBase()+".csv — "+r.selected.name+", "+r.selected.powerKw+" kW, "+r.selected.annualMWh+" MWh/yr."; });
+  $("btnJson").addEventListener("click", function(){ var r=collectReport(); downloadBlob(reportFileBase()+".json", JSON.stringify(r, null, 2), "application/json"); $("reportStatus").textContent="Data (.json) downloaded: "+reportFileBase()+".json."; });
+  $("btnPdf").addEventListener("click", function(){ var r=collectReport(); fillPrintReport(r); $("reportStatus").textContent="PDF ready — in the print dialog choose Destination: Save as PDF."; window.print(); });
   /* initial auto-suggestion note for the selected reach */
   var s0=siteById(state.selected), sug0=autoSuggest(hNet(), qDesign(s0), monthlyRange());
   $("autoReason").textContent=sug0.reason;
   renderAll();
 }
+
+/* ===== Report generation — current test condition, downloaded as .xls / .csv / PDF / .json ===== */
+function reportFileBase(){
+  var d=new Date(), m=("0"+(d.getMonth()+1)).slice(-2), day=("0"+d.getDate()).slice(-2);
+  return "FYP_Digital_Twin_Report_"+state.selected+"_"+d.getFullYear()+m+day;
+}
+function collectReport(){
+  var scope=$("reportScope").value, s=siteById(state.selected), c=compute(s), e=economics(c);
+  var rows=sysSites().map(function(x){ return {s:x, c:compute(x)}; });
+  rows.sort(function(a,b){ var ra=a.c.status.cls==="bad"?1:0, rb=b.c.status.cls==="bad"?1:0; if(ra!==rb) return ra-rb; return b.c.annual-a.c.annual; });
+  var totP=0, totE=0; rows.forEach(function(r){ if(r.c.status.cls!=="bad"){ totP+=r.c.power.kw; totE+=r.c.annual; } });
+  return { generated:new Date().toISOString(), scope:scope,
+    system: state.sys==="all"?"All systems — 21 reaches":state.sys==="swat"?"Lower Swat":"Kabul River",
+    condition:{ grossHeadM:state.gross, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
+      netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, effMode:state.effMode, varSpeed:state.varSpeed, units:c.units },
+    selected:{ id:s.id, name:s.name, offTake:s.off, designCusecs:s.cusecs, designM3s:Math.round(c.qD*100)/100, lengthFt:s.len, ccaAcres:s.cca,
+      turbine:c.turb.name, turbineMinHeadM:c.turb.minHead, etaTurb:Math.round(c.power.etaTurb*1000)/1000, etaTotal:Math.round(c.power.etaTotal*1000)/1000,
+      flowUsedM3s:Math.round(c.qUsed*100)/100, ratedKw:Math.round(c.rated*10)/10, powerKw:Math.round(c.power.kw*10)/10,
+      annualMWh:Math.round(c.annual*10)/10, capacityFactorPct:Math.round(c.cf*100), status:c.status.label,
+      veto:c.veto, vetoReason:state.vetoReason[s.id]||"",
+      capitalPKR:e?Math.round(e.cap):null, omPKRyr:e?Math.round(e.om):null, valuePKRyr:e?Math.round(e.val):null,
+      paybackYr:e?(isFinite(e.payback)?Math.round(e.payback*10)/10:null):null, lcoePKRkWh:e?Math.round(e.lcoe*10)/10:null,
+      monthlyMWh:c.monthly.map(function(v){ return Math.round(v*10)/10; }) },
+    ranking: rows.map(function(r,i){ return { rank:i+1, id:r.s.id, name:r.s.name, system:r.s.sys==="swat"?"Lower Swat":"Kabul River",
+      designM3s:Math.round(r.c.qD*100)/100, turbine:r.c.turb.name, netHeadM:Math.round(r.c.hNet*100)/100,
+      powerKw:r.c.status.cls==="bad"?0:Math.round(r.c.power.kw*10)/10, annualMWh:r.c.status.cls==="bad"?0:Math.round(r.c.annual*10)/10, status:r.c.status.label }; }),
+    systemTotalKw:Math.round(totP*10)/10, systemTotalMWh:Math.round(totE*10)/10,
+    honesty:"Heads are ASSUMED until sourced per fall. Turbine curves are typical values, not supplier data. System totals are upper bounds — branches reuse the same water, so reaches are not additive. Economics are ILLUSTRATIVE planning numbers. No environmental-analysis section, per the examiners' scope comment, 6 Nov 2026." };
+}
+function downloadBlob(filename, text, mime){
+  var blob=new Blob([text], {type:mime+";charset=utf-8"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function buildCsv(r){
+  var L=[];
+  L.push(["FYP Digital Twin — test-condition report","v2.1"]);
+  L.push(["Generated (UTC)", r.generated]);
+  L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All reaches in current system (ranking)":"Selected reach only"]);
+  L.push([]);
+  L.push(["TEST CONDITION"]);
+  L.push(["Gross head (m)", r.condition.grossHeadM]); L.push(["Total losses (m)", r.condition.lossesM]);
+  L.push(["Trash rack loss (m)", r.condition.trashM]); L.push(["Intake loss (m)", r.condition.intakeM]);
+  L.push(["Friction loss (m)", r.condition.frictionM]); L.push(["Exit loss (m)", r.condition.exitM]);
+  L.push(["Net head (m)", r.condition.netHeadM]); L.push(["Flow (% of design)", r.condition.flowPct]);
+  L.push(["Efficiency mode", r.condition.effMode]); L.push(["Variable speed", r.condition.varSpeed?"yes":"no"]); L.push(["Units", r.condition.units]);
+  L.push([]);
+  L.push(["SELECTED REACH"]);
+  var s=r.selected;
+  L.push(["Reach", s.name]); L.push(["Off-take", s.offTake]); L.push(["Design discharge (cusecs)", s.designCusecs]);
+  L.push(["Design discharge (m3/s)", s.designM3s]); L.push(["Length (ft)", s.lengthFt]); L.push(["CCA (acres)", s.ccaAcres]);
+  L.push(["Turbine", s.turbine]); L.push(["Turbine minimum head (m)", s.turbineMinHeadM]);
+  L.push(["Turbine efficiency", s.etaTurb]); L.push(["Overall efficiency", s.etaTotal]);
+  L.push(["Flow used (m3/s)", s.flowUsedM3s]); L.push(["Rated power (kW)", s.ratedKw]);
+  L.push(["Scenario power (kW)", s.powerKw]); L.push(["Annual energy (MWh/yr)", s.annualMWh]);
+  L.push(["Capacity factor (%)", s.capacityFactorPct]); L.push(["Status", s.status]);
+  L.push(["Irrigation veto", s.veto?"ON":"OFF"]); L.push(["Veto reason", s.vetoReason]);
+  L.push(["Capital (PKR, illustrative)", s.capitalPKR]); L.push(["Annual O&M (PKR/yr, illustrative)", s.omPKRyr]);
+  L.push(["Annual value (PKR/yr, illustrative)", s.valuePKRyr]); L.push(["Simple payback (yr, illustrative)", s.paybackYr]);
+  L.push(["LCOE (PKR/kWh, illustrative)", s.lcoePKRkWh]);
+  L.push(["Monthly energy Jan-Dec (MWh)", s.monthlyMWh.join(" | ")]);
+  L.push([]);
+  L.push(["RANKING — CURRENT SYSTEM (upper bound; reaches are not additive)"]);
+  L.push(["Rank","Reach","System","Design flow (m3/s)","Turbine","Net head (m)","Scenario power (kW)","Annual energy (MWh/yr)","Status"]);
+  r.ranking.forEach(function(x){ L.push([x.rank, x.name, x.system, x.designM3s, x.turbine, x.netHeadM, x.powerKw, x.annualMWh, x.status]); });
+  L.push(["System total (accepted reaches only, upper bound, kW)", r.systemTotalKw]);
+  L.push(["System total (accepted reaches only, upper bound, MWh/yr)", r.systemTotalMWh]);
+  L.push([]); L.push(["HONESTY LIMITS", r.honesty]);
+  return "\uFEFF" + L.map(function(row){ return row.map(csvEsc).join(","); }).join("\r\n");
+}
+function buildXls(r){
+  function esc(v){ return String(v===null||v===undefined?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function row(cells, head){ var t=head?"th":"td"; return "<tr>"+cells.map(function(c){ return "<"+t+">"+esc(c)+"</"+t+">"; }).join("")+"</tr>"; }
+  var h='<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"/></head><body>';
+  h+="<h1>FYP Digital Twin — test-condition report (v2.1)</h1><p>Generated (UTC): "+esc(r.generated)+" · System: "+esc(r.system)+"</p>";
+  h+="<h2>Test condition</h2><table border=\"1\">";
+  h+=row(["Gross head (m)", r.condition.grossHeadM])+row(["Total losses (m)", r.condition.lossesM])+row(["Net head (m)", r.condition.netHeadM]);
+  h+=row(["Flow (% of design)", r.condition.flowPct])+row(["Efficiency mode", r.condition.effMode])+row(["Variable speed", r.condition.varSpeed?"yes":"no"])+row(["Units", r.condition.units])+"</table>";
+  var s=r.selected;
+  h+="<h2>Selected reach — "+esc(s.name)+"</h2><table border=\"1\">";
+  h+=row(["Off-take", s.offTake])+row(["Design discharge (cusecs)", s.designCusecs])+row(["Design discharge (m3/s)", s.designM3s]);
+  h+=row(["Turbine", s.turbine])+row(["Turbine efficiency", s.etaTurb])+row(["Overall efficiency", s.etaTotal]);
+  h+=row(["Scenario power (kW)", s.powerKw])+row(["Annual energy (MWh/yr)", s.annualMWh])+row(["Capacity factor (%)", s.capacityFactorPct])+row(["Status", s.status]);
+  h+=row(["Capital (PKR, illustrative)", s.capitalPKR])+row(["Simple payback (yr, illustrative)", s.paybackYr])+row(["LCOE (PKR/kWh, illustrative)", s.lcoePKRkWh])+"</table>";
+  h+="<h2>Ranking — current system (upper bound; reaches are not additive)</h2><table border=\"1\">";
+  h+=row(["Rank","Reach","System","Design flow (m3/s)","Turbine","Net head (m)","Scenario power (kW)","Annual energy (MWh/yr)","Status"], true);
+  r.ranking.forEach(function(x){ h+=row([x.rank, x.name, x.system, x.designM3s, x.turbine, x.netHeadM, x.powerKw, x.annualMWh, x.status]); });
+  h+="</table><p>System total, accepted reaches only (upper bound): "+esc(r.systemTotalKw)+" kW, "+esc(r.systemTotalMWh)+" MWh/yr.</p>";
+  h+="<p><b>Honesty limits:</b> "+esc(r.honesty)+"</p></body></html>";
+  return h;
+}
+function fillPrintReport(r){
+  var s=r.selected, h="<h1>FYP Digital Twin — test-condition report (v2.1)</h1>";
+  h+="<p>Generated (UTC): "+s.name+" · "+r.generated+" · System: "+r.system+" · Report covers: "+(r.scope==="system"?"all reaches in current system":"selected reach only")+"</p>";
+  h+="<h2>Test condition</h2><table><tr><th>Gross head</th><td>"+r.condition.grossHeadM+" m</td><th>Losses</th><td>"+r.condition.lossesM+" m</td><th>Net head</th><td>"+r.condition.netHeadM+" m</td></tr>";
+  h+="<tr><th>Flow</th><td>"+r.condition.flowPct+"% of design</td><th>Efficiency mode</th><td>"+r.condition.effMode+"</td><th>Units</th><td>"+r.condition.units+"</td></tr></table>";
+  h+="<h2>Selected reach — "+s.name+"</h2><table>";
+  h+="<tr><th>Turbine</th><td>"+s.turbine+"</td><th>Scenario power</th><td>"+s.powerKw+" kW</td></tr>";
+  h+="<tr><th>Annual energy</th><td>"+s.annualMWh+" MWh/yr</td><th>Capacity factor</th><td>"+s.capacityFactorPct+"%</td></tr>";
+  h+="<tr><th>Status</th><td>"+s.status+"</td><th>Design discharge</th><td>"+s.designM3s+" m³/s ("+s.designCusecs+" cusecs)</td></tr></table>";
+  h+="<h2>Ranking — current system (upper bound; reaches are not additive)</h2><table><tr><th>Rank</th><th>Reach</th><th>Turbine</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
+  r.ranking.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.turbine+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
+  h+="</table><p>System total, accepted reaches only (upper bound): "+r.systemTotalKw+" kW, "+r.systemTotalMWh+" MWh/yr.</p>";
+  h+="<p><b>Honesty limits:</b> "+r.honesty+"</p>";
+  h+="<p>FYP group: M. Umar Shah, M. Ismail, Abdul Majid · Supervisor: Prof. Dr. Farid Ullah Khan · UET Peshawar, Nov 2026.</p>";
+  $("printReport").innerHTML=h;
+}
 if (typeof document !== "undefined"){ init(); }
 </script>
+<div id="printReport" aria-hidden="true"></div>
 </body>
 </html>
