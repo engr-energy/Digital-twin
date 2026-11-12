@@ -66,7 +66,9 @@ summary::marker{color:var(--teal)}
 .teamblock{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
 .member{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel2)}
 .member b{font-size:16px;color:var(--navy)}
-.member .role{font-size:13px;color:var(--ink2)} .member{text-align:center;padding:20px 14px} .member .avatar{width:84px;height:84px;border-radius:50%;background:var(--teal);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 12px} .member.supervisor{border-top:4px solid var(--teal)} .member .affil{font-size:12px;color:var(--mut)}
+.member .role{font-size:13px;color:var(--ink2)} .member{text-align:center;padding:20px 14px} .member .avatar{width:84px;height:84px;border-radius:50%;background:var(--teal);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.avatar.pick{cursor:pointer}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block} .member.supervisor{border-top:4px solid var(--teal)} .member .affil{font-size:12px;color:var(--mut)}
 .comparewrap{overflow-x:auto}
 .comparewrap table{min-width:900px}
 .envbar{height:14px;background:#eef3f6;border:1px solid var(--line);border-radius:7px;position:relative;margin:4px 0 10px}
@@ -405,11 +407,11 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <h2 id="teamH">Project team</h2>
 <p class="small">Final-year project group, BS Energy Engineering, UET Peshawar — 2026.</p>
 <div class="teamblock">
-<div class="member supervisor"><div class="avatar">FK</div><b>Prof. Dr. Farid Ullah Khan</b><div class="role">Project Supervisor</div><div class="affil">USPCAS-E, UET Peshawar</div></div>
-<div class="member"><div class="avatar">MI</div><b>M. Ismail</b><div class="role">Decision-Support Tool Development &amp; UI/UX</div></div>
-<div class="member"><div class="avatar">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
-<div class="member"><div class="avatar">AM</div><b>Abdul Majid</b><div class="role">Economic Analysis &amp; Turbine Selection</div></div>
-</div>
+<div class="member supervisor" data-member="FK"><div class="avatar pick" data-initials="FK" title="Click to add a photo">FK</div><b>Prof. Dr. Farid Ullah Khan</b><div class="role">Project Supervisor</div><div class="affil">USPCAS-E, UET Peshawar</div></div>
+<div class="member" data-member="MI"><div class="avatar pick" data-initials="MI" title="Click to add a photo">MI</div><b>M. Ismail</b><div class="role">Decision-Support Tool Development &amp; UI/UX</div></div>
+<div class="member" data-member="US"><div class="avatar pick" data-initials="US" title="Click to add a photo">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
+<div class="member" data-member="AM"><div class="avatar pick" data-initials="AM" title="Click to add a photo">AM</div><b>Abdul Majid</b><div class="role">Economic Analysis &amp; Turbine Selection</div></div>
+</div> <input type="file" id="teamPhotoInput" accept="image/*" hidden> <p class="small" id="teamNote">Click a team member's circle to add their photo. Photos you add here are saved in this browser only — to make them visible to everyone who opens the link, send them to the team to add to the page.</p>
 </section>
 
 <section class="panel" aria-labelledby="photoH">
@@ -423,7 +425,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.7 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.8 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -599,6 +601,54 @@ function downscalePhoto(file, done){
       if(w>max||h>max){ var s=Math.min(max/w, max/h); w=Math.round(w*s); h=Math.round(h*s); }
       var cv=document.createElement("canvas"); cv.width=w; cv.height=h;
       cv.getContext("2d").drawImage(img,0,0,w,h);
+      done(cv.toDataURL("image/jpeg",0.85));
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+/* ---------- team photo upload (browser-only: localStorage) ---------- */
+var TEAM_KEY="fypTeamPhotos_v1", teamPhotoTarget=null;
+function setTeamPhoto(id, src, save){
+  var m=document.querySelector('.member[data-member="'+id+'"]'); if(!m) return;
+  var av=m.querySelector(".avatar"); if(!av) return;
+  if(src){
+    av.innerHTML='<img src="'+src+'" alt="Photo of '+id+'">';
+    if(!m.querySelector(".rmteam")){
+      var rm=document.createElement("button"); rm.className="rmphoto rmteam"; rm.type="button"; rm.textContent="Remove photo";
+      rm.addEventListener("click", function(){ setTeamPhoto(id, null, true); });
+      m.appendChild(rm);
+    }
+  }else{
+    av.textContent=av.getAttribute("data-initials")||"";
+    var old=m.querySelector(".rmteam"); if(old) old.remove();
+  }
+  if(save) saveTeamPhotos();
+}
+function saveTeamPhotos(){
+  try{
+    var obj={};
+    Array.prototype.forEach.call(document.querySelectorAll(".member[data-member]"), function(m){
+      var img=m.querySelector(".avatar img"); if(img) obj[m.getAttribute("data-member")]=img.src;
+    });
+    localStorage.setItem(TEAM_KEY, JSON.stringify(obj));
+  }catch(e){}
+}
+function loadTeamPhotos(){
+  try{
+    var raw=localStorage.getItem(TEAM_KEY); if(!raw) return;
+    var obj=JSON.parse(raw);
+    Object.keys(obj).forEach(function(id){ if(obj[id]) setTeamPhoto(id, obj[id], false); });
+  }catch(e){}
+}
+function squarePhoto(file, done){
+  var reader=new FileReader();
+  reader.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var s=Math.min(img.width, img.height), sx=Math.round((img.width-s)/2), sy=Math.round((img.height-s)/2);
+      var cv=document.createElement("canvas"); cv.width=400; cv.height=400;
+      cv.getContext("2d").drawImage(img, sx, sy, s, s, 0, 0, 400, 400);
       done(cv.toDataURL("image/jpeg",0.85));
     };
     img.src=reader.result;
@@ -1278,7 +1328,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.7", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.8", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1311,7 +1361,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.7"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.8"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1388,7 +1438,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.7)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.8)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1758,13 +1808,26 @@ function init(){
     Array.prototype.forEach.call(files, function(f){
       if(!f.type||f.type.indexOf("image/")!==0) return;
       downscalePhoto(f, function(url){
-        var cap=prompt("Caption for this photo (canal or fall and date, if you know them):", "")||"Uploaded photo";
+        var cap=prompt("Caption for this photo (canal or fall and date, if you know them):", f.name.replace(/\.[^.]+$/,""))||"Uploaded photo";
         addUploadedFigure(url, cap, true);
       });
     });
     this.value="";
   });
   loadUploadedPhotos();
+  Array.prototype.forEach.call(document.querySelectorAll(".member .avatar"), function(av){
+    av.addEventListener("click", function(){
+      teamPhotoTarget=av.parentNode.getAttribute("data-member");
+      var inp=$("teamPhotoInput"); if(inp) inp.click();
+    });
+  });
+  on("teamPhotoInput","change", function(){
+    var files=this.files; if(!files||!files.length||!teamPhotoTarget) return;
+    var f=files[0], id=teamPhotoTarget;
+    if(f.type&&f.type.indexOf("image/")===0){ squarePhoto(f, function(url){ setTeamPhoto(id, url, true); }); }
+    this.value="";
+  });
+  loadTeamPhotos();
 }
 if (typeof document !== "undefined"){ init(); }
 </script>
