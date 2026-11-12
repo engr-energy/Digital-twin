@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) — Low-Head Hydropower, KP Irrigation Network</title>
 <style>
-:root{--bg:#e9eef2;--panel:#ffffff;--panel2:#eef3f6;--ink:#0b1f33;--ink2:#1e3a52;--mut:#4a6478;--line:#b9cbd8;--teal:#006d7a;--water:#006d7a;--water-d:#004e5f;--accent:#e8590c;--ok:#0b7a3e;--ok-bg:#d2f2df;--bad:#c1121f;--bad-bg:#fbdfe0;--warn:#8a5a00;--warn-bg:#ffeec2;--radius:14px;--navy:#0a2540;--amber:#ffc53d;--swat:#006d7a;--kabul:#7a4a12}
+:root{--bg:#f1f5f9;--panel:#f8fafc;--panel2:#e2e8f0;--ink:#0f172a;--ink2:#334155;--mut:#64748b;--line:#cbd5e1;--teal:#006d7a;--water:#006d7a;--water-d:#004e5f;--accent:#e8590c;--ok:#0b7a3e;--ok-bg:#d2f2df;--bad:#c1121f;--bad-bg:#fbdfe0;--warn:#8a5a00;--warn-bg:#ffeec2;--radius:14px;--navy:#0f172a;--amber:#ffc53d;--swat:#006d7a;--kabul:#7a4a12;--warm:#fdf6e3;--warm-panel:#eee8d5;--warm-line:#d3cbb8;--warm-ink:#2c3e50}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px 56px}
@@ -21,9 +21,10 @@ h1{font-size:2.5rem;line-height:1.1;margin:0 0 10px;color:#fff}
 .chip.hot{background:var(--accent);border-color:var(--accent);color:#fff}
 .team{font-size:14px;color:#c9dcea;margin:8px 0 0}
 .team b{color:#fff}
-.panel{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--water);border-radius:var(--radius);padding:18px;margin:16px 0;box-shadow:0 2px 8px rgba(10,37,64,.12)}
+.panel{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--water);border-radius:var(--radius);padding:18px;margin:16px 0;box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -1px rgba(0,0,0,.03)}
 .panel h2{margin:0 0 4px;font-size:22px;color:var(--navy)}
 .panel h3{margin:14px 0 6px;font-size:17px;color:var(--navy)}
+.panel.warm{background:var(--warm);border-color:var(--warm-line)}
 .small{font-size:13px;color:var(--mut)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:14px 0}
 .kpi{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--water);border-radius:12px;padding:12px 14px}
@@ -167,6 +168,17 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="team"><b>Supervisor:</b> Prof. Dr. Farid Ullah Khan &nbsp;·&nbsp; <b>Group:</b> M. Ismail &middot; M. Umar Shah &middot; Abdul Majid</p>
 </div>
 </header>
+
+<section class="panel warm" aria-labelledby="teamH">
+<h2 id="teamH">Project team</h2>
+<p class="small">Final-year project group, BS Energy Engineering, UET Peshawar — 2026.</p>
+<div class="teamblock">
+<div class="member supervisor" data-member="FK"><div class="avatar pick" data-initials="FK" title="Click to add a photo">FK</div><b>Prof. Dr. Farid Ullah Khan</b><div class="role">Project Supervisor</div><div class="affil">USPCAS-E, UET Peshawar</div></div>
+<div class="member" data-member="MI"><div class="avatar pick" data-initials="MI" title="Click to add a photo">MI</div><b>M. Ismail</b><div class="role">Decision-Support Tool Development &amp; UI/UX</div></div>
+<div class="member" data-member="US"><div class="avatar pick" data-initials="US" title="Click to add a photo">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
+<div class="member" data-member="AM"><div class="avatar pick" data-initials="AM" title="Click to add a photo">AM</div><b>Abdul Majid</b><div class="role">Economic Analysis &amp; Turbine Selection</div></div>
+</div> <input type="file" id="teamPhotoInput" accept="image/*" hidden> <p class="small" id="teamNote">Click a team member's circle to add their photo. Photos you add here are saved in this browser only — to make them visible to everyone who opens the link, send them to the team to add to the page.</p>
+</section>
 
 <section class="panel" aria-labelledby="modeH">
 <h2 id="modeH">System</h2>
@@ -345,8 +357,6 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="small">Runner and head-range values are typical for the family — not a site drawing and not a supplier drawing.</p>
 </section>
 
-
-
 <section class="panel" aria-labelledby="rankH">
 <h2 id="rankH">Fall ranking</h2>
 <p class="small">Rejected falls rank last, at 0. Others rank by annual energy. Ranking is by head &times; flow — a fall with a small head ranks low even on a big canal. Click a row to select it.</p>
@@ -415,17 +425,6 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="small" id="reportStatus">PDF: Print &rarr; Save as PDF. .xls opens in Excel / LibreOffice / Sheets.</p>
 </section>
 
-<section class="panel" aria-labelledby="teamH">
-<h2 id="teamH">Project team</h2>
-<p class="small">Final-year project group, BS Energy Engineering, UET Peshawar — 2026.</p>
-<div class="teamblock">
-<div class="member supervisor" data-member="FK"><div class="avatar pick" data-initials="FK" title="Click to add a photo">FK</div><b>Prof. Dr. Farid Ullah Khan</b><div class="role">Project Supervisor</div><div class="affil">USPCAS-E, UET Peshawar</div></div>
-<div class="member" data-member="MI"><div class="avatar pick" data-initials="MI" title="Click to add a photo">MI</div><b>M. Ismail</b><div class="role">Decision-Support Tool Development &amp; UI/UX</div></div>
-<div class="member" data-member="US"><div class="avatar pick" data-initials="US" title="Click to add a photo">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
-<div class="member" data-member="AM"><div class="avatar pick" data-initials="AM" title="Click to add a photo">AM</div><b>Abdul Majid</b><div class="role">Economic Analysis &amp; Turbine Selection</div></div>
-</div> <input type="file" id="teamPhotoInput" accept="image/*" hidden> <p class="small" id="teamNote">Click a team member's circle to add their photo. Photos you add here are saved in this browser only — to make them visible to everyone who opens the link, send them to the team to add to the page.</p>
-</section>
-
 <section class="panel" aria-labelledby="photoH">
 <h2 id="photoH">Site photos</h2>
 <p class="small">Field photos from the group's site visits — real sites, not uploads from the internet. Hero photo: canal fall in operation, Warsak Canal field visit, 29 Oct 2026.</p>
@@ -437,7 +436,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.12 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.13 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -1380,7 +1379,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.12", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.13", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1413,7 +1412,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.12"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.13"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1490,7 +1489,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.12)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.13)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
