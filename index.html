@@ -436,7 +436,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.10 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.11 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -1379,7 +1379,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.10", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.11", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1412,7 +1412,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.10"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.11"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1489,7 +1489,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.10)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.11)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1880,18 +1880,8 @@ function init(){
   });
   loadTeamPhotos();
   on("peZoom","input", function(){ peSettings.zoom=parseFloat(this.value); syncEditorControls(); });
-  on("peX","input", function(){
-    peSettings.x=parseFloat(this.value);
-    var img=$("pePreview").querySelector("img");
-    if(img && peSettings.zoom===1 && photoOverflow(img, peSettings).mx===0){ peSettings.zoom=1.25; }
-    syncEditorControls();
-  });
-  on("peY","input", function(){
-    peSettings.y=parseFloat(this.value);
-    var img=$("pePreview").querySelector("img");
-    if(img && peSettings.zoom===1 && photoOverflow(img, peSettings).my===0){ peSettings.zoom=1.25; }
-    syncEditorControls();
-  });
+  on("peX","input", function(){ peSettings.x=parseFloat(this.value); syncEditorControls(); });
+  on("peY","input", function(){ peSettings.y=parseFloat(this.value); syncEditorControls(); });
   on("peFit","click", function(){ peSettings.fit=peSettings.fit==="cover"?"contain":"cover"; syncEditorControls(); });
   on("peRot","click", function(){ peSettings.rot=(peSettings.rot+90)%360; syncEditorControls(); });
   on("peReset","click", function(){ peSettings=defaultPhotoSettings(); syncEditorControls(); });
