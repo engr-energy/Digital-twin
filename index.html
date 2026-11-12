@@ -308,7 +308,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <h2 id="plantH">Plant view — schematic</h2>
 <p class="small"><b>Schematic — not a site drawing.</b> The scene is driven by the tool: gross and net head set the fall height and water levels, flow sets the water and rotor speed, and the selected turbine, generator and draft tube change the machine. Until measured heads replace the placeholders, this is an illustration of the layout, not a surveyed plant.</p>
 <p><button class="btn ghost" data-plantview="side" aria-pressed="true">Side view</button> <button class="btn ghost" data-plantview="cutaway" aria-pressed="false">Cutaway</button> <span class="small" id="plantNote"></span></p>
-<svg id="plantSvg" width="100%" height="420" viewBox="0 0 960 420" role="img" aria-label="Schematic plant view: canal, intake, turbine chamber, generator house, draft tube and tailrace"></svg>
+<svg id="plantSvg" width="100%" height="380" viewBox="0 0 960 380" role="img" aria-label="Schematic plant view: canal, intake, turbine chamber, generator house, draft tube and tailrace"></svg>
 <p class="small">Scale bar: bottom left of the drawing (1 m = 55 px); the dimension lines on the right are in metres (gross and net head). Water is shown at the current flow percentage; at 0% (canal closure) the channel is empty and the rotor stops. Works offline — no external library is loaded; if the browser cannot draw SVG, the turbine-geometry diagram below is the fallback.</p>
 </section>
 
@@ -1470,7 +1470,7 @@ function renderCompareSet(s,c){
 /* ===== Plant view (audit A1) — interactive SVG schematic, no external library ===== */
 function drawPlant(s,c){
   var svg=$("plantSvg"); if(!svg) return;
-  var W=960,H=420, t=c.turb;
+  var W=960,H=380, t=c.turb;
   var gross=c.fallGross, net=c.hNet, scale=55; /* px per metre of head */
   var yHW=120, drop=Math.max(40, Math.round(gross*scale)), yTW=yHW+drop;
   var flowPct=state.flowPct, water=flowPct>0;
@@ -1569,7 +1569,7 @@ function drawPlant(s,c){
     h+=runner;
     h+='<text x="'+(tx+44)+'" y="'+(ty+4)+'" font-size="11" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">'+t.name.split(",")[0].toUpperCase()+'</text>';
   } else {
-    h+='<text x="565" y="'+(yTW+24)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">TURBINE INSIDE — SEE CUTAWAY</text>';
+    h+='<text x="562" y="'+(yTW+24)+'" font-size="10" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">TURBINE INSIDE — SEE CUTAWAY</text>';
   }
   /* ---- draft tube + tailrace ---- */
   if(cut){
@@ -1584,6 +1584,7 @@ function drawPlant(s,c){
   h+='<text x="795" y="'+(yTW-10)+'" font-size="13" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">TAILRACE</text>';
   if(water) h+='<line x1="672" y1="'+(yTW+22)+'" x2="922" y2="'+(yTW+22)+'" stroke="#fff" stroke-width="3" stroke-dasharray="14 12"><animate attributeName="stroke-dashoffset" from="0" to="-52" dur="'+dur.toFixed(1)+'s" repeatCount="indefinite"/></line>';
   h+='<text x="795" y="'+(yTW+64)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">'+DRAFT_TYPES[state.draftType].label+' · exit −'+loss.exit.toFixed(2)+' m</text>';
+  h+='<text x="795" y="'+(yTW+88)+'" font-size="10" text-anchor="middle" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">Tailrace continues downstream →</text>';
   /* ---- dimension lines: gross head (right) and net head ---- */
   var yNet=yHW+Math.round(totLoss*scale);
   h+='<line x1="948" y1="'+yHW+'" x2="948" y2="'+yTW+'" stroke="#c1121f" stroke-width="3"/>';
