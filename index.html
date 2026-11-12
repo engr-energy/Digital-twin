@@ -308,8 +308,8 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <h2 id="plantH">Plant view — schematic</h2>
 <p class="small"><b>Schematic — not a site drawing.</b> The scene is driven by the tool: gross and net head set the fall height and water levels, flow sets the water and rotor speed, and the selected turbine, generator and draft tube change the machine. Until measured heads replace the placeholders, this is an illustration of the layout, not a surveyed plant.</p>
 <p><button class="btn ghost" data-plantview="side" aria-pressed="true">Side view</button> <button class="btn ghost" data-plantview="cutaway" aria-pressed="false">Cutaway</button> <span class="small" id="plantNote"></span></p>
-<svg id="plantSvg" width="100%" height="300" viewBox="0 0 640 300" role="img" aria-label="Schematic plant view: canal, intake, turbine chamber, generator house, draft tube and tailrace"></svg>
-<p class="small">Scale bar: the dimension line on the right is in metres (gross and net head). Water is shown at the current flow percentage; at 0% (canal closure) the channel is empty and the rotor stops. Works offline — no external library is loaded; if the browser cannot draw SVG, the turbine-geometry diagram below is the fallback.</p>
+<svg id="plantSvg" width="100%" height="540" viewBox="0 0 960 540" role="img" aria-label="Schematic plant view: canal, intake, turbine chamber, generator house, draft tube and tailrace"></svg>
+<p class="small">Scale bar: bottom left of the drawing (1 m = 55 px); the dimension lines on the right are in metres (gross and net head). Water is shown at the current flow percentage; at 0% (canal closure) the channel is empty and the rotor stops. Works offline — no external library is loaded; if the browser cannot draw SVG, the turbine-geometry diagram below is the fallback.</p>
 </section>
 
 <section class="panel geo" aria-labelledby="geoH">
@@ -1470,57 +1470,135 @@ function renderCompareSet(s,c){
 /* ===== Plant view (audit A1) — interactive SVG schematic, no external library ===== */
 function drawPlant(s,c){
   var svg=$("plantSvg"); if(!svg) return;
-  var W=640,H=300, t=c.turb;
-  var gross=c.fallGross, net=c.hNet, scale=18; /* px per metre of head */
-  var drop=Math.max(6, gross*scale), yHead=70, yTail=yHead+drop;
-  var flowPct=state.flowPct, water = flowPct>0;
+  var W=960,H=540, t=c.turb;
+  var gross=c.fallGross, net=c.hNet, scale=55; /* px per metre of head */
+  var yHW=120, drop=Math.max(40, Math.round(gross*scale)), yTW=yHW+drop;
+  var flowPct=state.flowPct, water=flowPct>0;
   var col=t.color||"#006d7a";
-  var loss=state.losses;
-  var html='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#dcebf2"/>';
-  /* upstream canal + headwater */
-  html+='<rect x="20" y="'+yHead+'" width="170" height="40" fill="'+(water?"#4db6c6":"#eef3f6")+'" stroke="#0a2540" stroke-width="3"/>';
-  html+='<text x="105" y="'+(yHead-8)+'" font-size="12" text-anchor="middle" font-weight="700" fill="#0a2540">CANAL — HEADWATER</text>';
-  /* intake / trash rack */
-  html+='<rect x="190" y="'+yHead+'" width="50" height="40" fill="#b9cdd6" stroke="#0a2540" stroke-width="3"/>';
-  for(var i=0;i<3;i++) html+='<line x1="'+(202+i*12)+'" y1="'+yHead+'" x2="'+(202+i*12)+'" y2="'+(yHead+40)+'" stroke="#0a2540" stroke-width="2"/>';
-  html+='<text x="215" y="'+(yHead+56)+'" font-size="10" text-anchor="middle" fill="#0a2540">TRASH RACK −'+loss.trash.toFixed(2)+' m</text>';
-  /* fall + turbine chamber */
-  html+='<rect x="240" y="'+yHead+'" width="140" height="'+drop+'" fill="#d9cdb4" stroke="#0a2540" stroke-width="3"/>';
-  html+='<text x="310" y="'+(yHead+16)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#0a2540">TURBINE CHAMBER</text>';
-  if(state.plantView==="cutaway"){
-    html+='<circle cx="310" cy="'+(yHead+drop/2+10)+'" r="26" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>';
-    html+='<circle cx="310" cy="'+(yHead+drop/2+10)+'" r="6" fill="#0a2540"/>';
-    html+='<text x="310" y="'+(yHead+drop/2+52)+'" font-size="10" text-anchor="middle" fill="#0a2540">RUNNER — '+t.name+'</text>';
-  } else {
-    html+='<rect x="270" y="'+(yHead+drop/2-6)+'" width="80" height="34" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>';
-    html+='<text x="310" y="'+(yHead+drop/2+13)+'" font-size="10" text-anchor="middle" fill="#fff">'+t.name.split(",")[0].toUpperCase()+'</text>';
+  var loss=state.losses, totLoss=loss.trash+loss.intake+loss.friction+loss.exit;
+  var dur=Math.max(0.5, 2.4*(100/Math.max(15,flowPct))); /* water speed from flow */
+  var durR=(dur*1.8).toFixed(1);
+  var tx=560, ty=yTW-52; /* turbine centre */
+  var cut=state.plantView==="cutaway";
+  var watFill=water?"url(#watG)":"#eef3f6";
+  var h='';
+  h+='<defs>'
+    +'<linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#aed9e8"/><stop offset="1" stop-color="#e9f5f9"/></linearGradient>'
+    +'<linearGradient id="watG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc3d4"/><stop offset="1" stop-color="#1e8fa3"/></linearGradient>'
+    +'<linearGradient id="grdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b18c"/><stop offset="1" stop-color="#9c825c"/></linearGradient>'
+    +'</defs>';
+  /* sky, sun, clouds */
+  h+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#skyG)"/>';
+  h+='<circle cx="884" cy="46" r="22" fill="#ffd95e" opacity="0.9"/>';
+  h+='<ellipse cx="170" cy="48" rx="48" ry="12" fill="#fff" opacity="0.8"/><ellipse cx="420" cy="36" rx="58" ry="13" fill="#fff" opacity="0.7"/>';
+  /* ground terraces: upper bank, fall face, lower bank */
+  h+='<rect x="0" y="'+(yHW+46)+'" width="470" height="'+(H-yHW-46)+'" fill="url(#grdG)"/>';
+  h+='<rect x="470" y="'+(yTW+46)+'" width="190" height="'+(H-yTW-46)+'" fill="url(#grdG)"/>';
+  h+='<rect x="660" y="'+(yTW+46)+'" width="300" height="'+(H-yTW-46)+'" fill="url(#grdG)"/>';
+  h+='<rect x="0" y="'+(yHW+46)+'" width="470" height="10" fill="#8fae6b"/>';
+  h+='<rect x="660" y="'+(yTW+46)+'" width="300" height="10" fill="#8fae6b"/>';
+  h+='<rect x="462" y="'+(yHW+46)+'" width="8" height="'+(yTW-yHW)+'" fill="#b09a76" stroke="#0a2540" stroke-width="1"/>';
+  /* ---- upstream canal ---- */
+  h+='<rect x="30" y="'+yHW+'" width="270" height="46" fill="#d7dee2" stroke="#0a2540" stroke-width="3"/>';
+  h+='<rect x="34" y="'+(yHW+2)+'" width="262" height="42" fill="'+watFill+'"/>';
+  h+='<text x="165" y="'+(yHW-10)+'" font-size="13" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">HEADWATER — CANAL</text>';
+  if(water) h+='<line x1="40" y1="'+(yHW+22)+'" x2="296" y2="'+(yHW+22)+'" stroke="#fff" stroke-width="3" stroke-dasharray="14 12"><animate attributeName="stroke-dashoffset" from="0" to="-52" dur="'+dur.toFixed(1)+'s" repeatCount="indefinite"/></line>';
+  /* ---- intake headwall + trash rack ---- */
+  h+='<rect x="300" y="'+(yHW-20)+'" width="32" height="66" fill="#c3ced4" stroke="#0a2540" stroke-width="3"/>';
+  for(var i=0;i<4;i++) h+='<line x1="'+(307+i*6)+'" y1="'+(yHW-14)+'" x2="'+(307+i*6)+'" y2="'+(yHW+40)+'" stroke="#0a2540" stroke-width="2"/>';
+  h+='<text x="316" y="'+(yHW+64)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">TRASH RACK −'+loss.trash.toFixed(2)+' m</text>';
+  h+='<text x="316" y="'+(yHW+78)+'" font-size="10" text-anchor="middle" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">intake −'+loss.intake.toFixed(2)+' m</text>';
+  /* ---- penstock (pipe from intake down to turbine) ---- */
+  h+='<line x1="332" y1="'+(yHW+23)+'" x2="'+(tx-28)+'" y2="'+(ty-6)+'" stroke="#8d7d63" stroke-width="30" stroke-linecap="round"/>';
+  h+='<line x1="332" y1="'+(yHW+23)+'" x2="'+(tx-28)+'" y2="'+(ty-6)+'" stroke="'+(water?"#2b9db1":"#dfe7ea")+'" stroke-width="18" stroke-linecap="round"/>';
+  if(water) h+='<line x1="332" y1="'+(yHW+23)+'" x2="'+(tx-28)+'" y2="'+(ty-6)+'" stroke="#fff" stroke-width="3" stroke-dasharray="12 12"><animate attributeName="stroke-dashoffset" from="0" to="-48" dur="'+dur.toFixed(1)+'s" repeatCount="indefinite"/></line>';
+  h+='<text x="430" y="150" font-size="12" text-anchor="middle" font-weight="700" fill="#0a2540" transform="rotate(-13 430 150)" style="paint-order:stroke;stroke:#fff;stroke-width:3px">PENSTOCK · friction −'+loss.friction.toFixed(2)+' m</text>';
+  /* ---- powerhouse ---- */
+  var wallFill=cut?"#efe8d6":"#efe8d6", wallOp=cut?0.22:1;
+  h+='<rect x="470" y="'+(yTW-150)+'" width="190" height="196" fill="'+wallFill+'" fill-opacity="'+wallOp+'" stroke="#0a2540" stroke-width="3"/>';
+  h+='<polygon points="462,'+(yTW-150)+' 668,'+(yTW-150)+' 640,'+(yTW-180)+' 490,'+(yTW-180)+'" fill="#006d7a" stroke="#0a2540" stroke-width="3"/>';
+  h+='<text x="565" y="'+(yTW-128)+'" font-size="13" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">POWERHOUSE</text>';
+  if(!cut){
+    h+='<rect x="540" y="'+(yTW+6)+'" width="50" height="40" fill="#7a6a55" stroke="#0a2540" stroke-width="2"/>';
+    h+='<rect x="486" y="'+(yTW-96)+'" width="34" height="26" fill="#7fd1de" stroke="#0a2540" stroke-width="2"/>';
+    h+='<rect x="610" y="'+(yTW-96)+'" width="34" height="26" fill="#7fd1de" stroke="#0a2540" stroke-width="2"/>';
   }
-  /* generator house */
-  html+='<rect x="255" y="'+(yHead-34)+'" width="110" height="30" fill="#0a2540" stroke="#0a2540" stroke-width="2"/>';
-  html+='<text x="310" y="'+(yHead-14)+'" font-size="11" text-anchor="middle" fill="#fff">GENERATOR HOUSE</text>';
-  html+='<text x="310" y="'+(yHead-40)+'" font-size="10" text-anchor="middle" fill="#0a2540">'+GEN_TYPES[state.genType].label+' — η '+fmt(state.genEta,2)+'</text>';
-  /* draft tube + tailrace */
-  html+='<rect x="380" y="'+yTail+'" width="240" height="26" fill="'+(water?"#4db6c6":"#eef3f6")+'" stroke="#0a2540" stroke-width="3"/>';
-  html+='<text x="500" y="'+(yTail-8)+'" font-size="12" text-anchor="middle" font-weight="700" fill="#0a2540">TAILRACE</text>';
-  html+='<text x="500" y="'+(yTail+42)+'" font-size="10" text-anchor="middle" fill="#0a2540">'+DRAFT_TYPES[state.draftType].label+' −'+loss.exit.toFixed(2)+' m</text>';
-  /* water flow animation */
-  if(water){
-    var dur=Math.max(0.6, 3*(100/Math.max(20,flowPct)));
-    html+='<line x1="20" y1="'+(yHead+20)+'" x2="620" y2="'+(yHead+20)+'" stroke="#fff" stroke-width="3" stroke-dasharray="12 10"><animate attributeName="stroke-dashoffset" from="0" to="-44" dur="'+dur.toFixed(1)+'s" repeatCount="indefinite"/></line>';
+  /* ---- generator + shaft ---- */
+  h+='<rect x="'+(tx-36)+'" y="'+(yTW-112)+'" width="72" height="34" fill="#14385e" stroke="#0a2540" stroke-width="3"/>';
+  h+='<text x="'+tx+'" y="'+(yTW-91)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#fff">GENERATOR</text>';
+  h+='<line x1="'+tx+'" y1="'+(yTW-78)+'" x2="'+tx+'" y2="'+(ty-26)+'" stroke="#0a2540" stroke-width="7"/>';
+  h+='<text x="'+(tx+44)+'" y="'+(yTW-104)+'" font-size="10" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">'+GEN_TYPES[state.genType].label+' · η '+fmt(state.genEta,2)+'</text>';
+  /* ---- turbine runner, shape depends on family ---- */
+  var runner='';
+  if(t.id==="screw"){
+    runner='<g transform="rotate(-35 '+tx+' '+ty+')"><rect x="'+(tx-34)+'" y="'+(ty-14)+'" width="68" height="28" rx="12" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'
+      +'<line x1="'+(tx-26)+'" y1="'+(ty-12)+'" x2="'+(tx-26)+'" y2="'+(ty+12)+'" stroke="#fff" stroke-width="2"/><line x1="'+(tx-8)+'" y1="'+(ty-12)+'" x2="'+(tx-8)+'" y2="'+(ty+12)+'" stroke="#fff" stroke-width="2"/><line x1="'+(tx+10)+'" y1="'+(ty-12)+'" x2="'+(tx+10)+'" y2="'+(ty+12)+'" stroke="#fff" stroke-width="2"/><line x1="'+(tx+26)+'" y1="'+(ty-12)+'" x2="'+(tx+26)+'" y2="'+(ty+12)+'" stroke="#fff" stroke-width="2"/></g>';
+  } else if(t.id==="wheel"){
+    var spokes='';
+    for(var w=0;w<8;w++){ var a=w*Math.PI/4; spokes+='<line x1="'+tx+'" y1="'+ty+'" x2="'+(tx+Math.round(30*Math.cos(a)))+'" y2="'+(ty+Math.round(30*Math.sin(a)))+'" stroke="#0a2540" stroke-width="3"/>'; }
+    runner='<g>'+(water?'<animateTransform attributeName="transform" type="rotate" from="0 '+tx+' '+ty+'" to="360 '+tx+' '+ty+'" dur="'+(durR*2)+'s" repeatCount="indefinite"/>':'')
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="32" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'+spokes
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="7" fill="#0a2540"/></g>';
+  } else if(t.id==="crossflow"){
+    var slats='';
+    for(var k2=0;k2<8;k2++){ var a2=k2*Math.PI/4; slats+='<line x1="'+(tx+Math.round(10*Math.cos(a2)))+'" y1="'+(ty+Math.round(10*Math.sin(a2)))+'" x2="'+(tx+Math.round(28*Math.cos(a2)))+'" y2="'+(ty+Math.round(28*Math.sin(a2)))+'" stroke="#fff" stroke-width="3"/>'; }
+    runner='<g>'+(water?'<animateTransform attributeName="transform" type="rotate" from="0 '+tx+' '+ty+'" to="360 '+tx+' '+ty+'" dur="'+durR+'s" repeatCount="indefinite"/>':'')
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="30" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'+slats
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="8" fill="#0a2540"/></g>';
+  } else if(t.id==="vlh"){
+    runner='<g>'+(water?'<animateTransform attributeName="transform" type="rotate" from="0 '+tx+' '+ty+'" to="360 '+tx+' '+ty+'" dur="'+durR+'s" repeatCount="indefinite"/>':'')
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="36" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'
+      +'<ellipse cx="'+tx+'" cy="'+(ty-20)+'" rx="8" ry="16" fill="#fff" opacity="0.85"/><ellipse cx="'+(tx-18)+'" cy="'+(ty+12)+'" rx="8" ry="16" fill="#fff" opacity="0.85" transform="rotate(60 '+(tx-18)+' '+(ty+12)+')"/><ellipse cx="'+(tx+18)+'" cy="'+(ty+12)+'" rx="8" ry="16" fill="#fff" opacity="0.85" transform="rotate(-60 '+(tx+18)+' '+(ty+12)+')"/>'
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="7" fill="#0a2540"/></g>';
+  } else if(t.id==="bulb"){
+    runner='<g>'+(water?'<animateTransform attributeName="transform" type="rotate" from="0 '+tx+' '+ty+'" to="360 '+tx+' '+ty+'" dur="'+durR+'s" repeatCount="indefinite"/>':'')
+      +'<ellipse cx="'+tx+'" cy="'+ty+'" rx="34" ry="18" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'
+      +'<ellipse cx="'+(tx+22)+'" cy="'+(ty-10)+'" rx="5" ry="12" fill="#fff" opacity="0.85"/><ellipse cx="'+(tx+22)+'" cy="'+(ty+10)+'" rx="5" ry="12" fill="#fff" opacity="0.85"/>'
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="6" fill="#0a2540"/></g>';
+  } else { /* kaplan / propeller: 4 blades */
+    runner='<g>'+(water?'<animateTransform attributeName="transform" type="rotate" from="0 '+tx+' '+ty+'" to="360 '+tx+' '+ty+'" dur="'+durR+'s" repeatCount="indefinite"/>':'')
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="30" fill="'+col+'" stroke="#0a2540" stroke-width="3"/>'
+      +'<ellipse cx="'+tx+'" cy="'+(ty-18)+'" rx="7" ry="14" fill="#fff" opacity="0.9"/><ellipse cx="'+tx+'" cy="'+(ty+18)+'" rx="7" ry="14" fill="#fff" opacity="0.9"/><ellipse cx="'+(tx-18)+'" cy="'+ty+'" rx="14" ry="7" fill="#fff" opacity="0.9"/><ellipse cx="'+(tx+18)+'" cy="'+ty+'" rx="14" ry="7" fill="#fff" opacity="0.9"/>'
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="7" fill="#0a2540"/></g>';
   }
-  /* dimension line */
-  html+='<line x1="628" y1="'+yHead+'" x2="628" y2="'+yTail+'" stroke="#c1121f" stroke-width="3"/>';
-  html+='<text x="622" y="'+((yHead+yTail)/2-6)+'" font-size="11" text-anchor="end" font-weight="700" fill="#c1121f">H gross '+fmt(gross,2)+' m</text>';
-  html+='<text x="622" y="'+((yHead+yTail)/2+10)+'" font-size="11" text-anchor="end" font-weight="700" fill="#c1121f">H net '+fmt(net,2)+' m</text>';
-  /* losses */
-  html+='<text x="20" y="'+(H-28)+'" font-size="11" fill="#0a2540">Losses: trash '+loss.trash.toFixed(2)+' m · intake '+loss.intake.toFixed(2)+' m · friction '+loss.friction.toFixed(2)+' m · exit '+loss.exit.toFixed(2)+' m · total '+fmt(loss.trash+loss.intake+loss.friction+loss.exit,2)+' m</text>';
-  html+='<text x="20" y="'+(H-12)+'" font-size="11" fill="#0a2540">Flow '+flowPct+'% of design'+(flowPct===0?" — channel empty, rotor stopped":"")+' · Units needed: '+unitsRequired(t,c.qT)+' · Scale bar: 1 m = '+scale+' px (dimension line, right)</text>';
-  svg.innerHTML=html;
+  h+=runner;
+  h+='<text x="'+(tx+44)+'" y="'+(ty+4)+'" font-size="11" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">'+t.name.split(",")[0].toUpperCase()+'</text>';
+  /* ---- draft tube + tailrace ---- */
+  h+='<path d="M '+tx+' '+(ty+22)+' L '+tx+' '+(yTW+18)+' L 700 '+(yTW+18)+'" fill="none" stroke="#8d7d63" stroke-width="26" stroke-linecap="round"/>';
+  h+='<path d="M '+tx+' '+(ty+22)+' L '+tx+' '+(yTW+18)+' L 700 '+(yTW+18)+'" fill="none" stroke="'+(water?"#2b9db1":"#dfe7ea")+'" stroke-width="14" stroke-linecap="round"/>';
+  h+='<rect x="660" y="'+yTW+'" width="270" height="46" fill="#d7dee2" stroke="#0a2540" stroke-width="3"/>';
+  h+='<rect x="664" y="'+(yTW+2)+'" width="262" height="42" fill="'+watFill+'"/>';
+  h+='<text x="795" y="'+(yTW-10)+'" font-size="13" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">TAILRACE</text>';
+  if(water) h+='<line x1="672" y1="'+(yTW+22)+'" x2="922" y2="'+(yTW+22)+'" stroke="#fff" stroke-width="3" stroke-dasharray="14 12"><animate attributeName="stroke-dashoffset" from="0" to="-52" dur="'+dur.toFixed(1)+'s" repeatCount="indefinite"/></line>';
+  h+='<text x="795" y="'+(yTW+64)+'" font-size="11" text-anchor="middle" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">'+DRAFT_TYPES[state.draftType].label+' · exit −'+loss.exit.toFixed(2)+' m</text>';
+  /* ---- dimension lines: gross head (right) and net head ---- */
+  var yNet=yHW+Math.round(totLoss*scale);
+  h+='<line x1="948" y1="'+yHW+'" x2="948" y2="'+yTW+'" stroke="#c1121f" stroke-width="3"/>';
+  h+='<polygon points="948,'+yHW+' 942,'+(yHW+10)+' 954,'+(yHW+10)+'" fill="#c1121f"/>';
+  h+='<polygon points="948,'+yTW+' 942,'+(yTW-10)+' 954,'+(yTW-10)+'" fill="#c1121f"/>';
+  h+='<text x="940" y="'+((yHW+yTW)/2-4)+'" font-size="12" text-anchor="end" font-weight="700" fill="#c1121f" style="paint-order:stroke;stroke:#fff;stroke-width:3px">H gross '+fmt(gross,2)+' m</text>';
+  h+='<line x1="926" y1="'+yNet+'" x2="926" y2="'+yTW+'" stroke="#006d7a" stroke-width="2" stroke-dasharray="5 3"/>';
+  h+='<text x="918" y="'+((yNet+yTW)/2+4)+'" font-size="11" text-anchor="end" font-weight="700" fill="#006d7a" style="paint-order:stroke;stroke:#fff;stroke-width:3px">H net '+fmt(net,2)+' m</text>';
+  /* ---- info chip: live values ---- */
+  h+='<rect x="16" y="12" width="470" height="56" rx="8" fill="#0a2540" opacity="0.92"/>';
+  h+='<text x="30" y="36" font-size="14" font-weight="700" fill="#fff">'+s.name+' — '+fmt(c.power.kw,1)+' kW</text>';
+  h+='<text x="30" y="56" font-size="12" fill="#d7e6f0">Flow '+fmt(c.qT,2)+' m³/s · H gross '+fmt(gross,2)+' m · H net '+fmt(net,2)+' m · '+flowPct+'% of design'+(water?"":" · CANAL CLOSED")+'</text>';
+  /* ---- scale bar (bottom left) ---- */
+  var sbY=H-34;
+  h+='<rect x="30" y="'+sbY+'" width="'+scale+'" height="8" fill="#0a2540"/>';
+  h+='<rect x="'+(30+scale)+'" y="'+sbY+'" width="'+scale+'" height="8" fill="#fff" stroke="#0a2540" stroke-width="1"/>';
+  h+='<text x="30" y="'+(sbY-6)+'" font-size="11" font-weight="700" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">0</text>';
+  h+='<text x="'+(30+scale)+'" y="'+(sbY-6)+'" font-size="11" font-weight="700" text-anchor="middle" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">1 m</text>';
+  h+='<text x="'+(30+2*scale)+'" y="'+(sbY-6)+'" font-size="11" font-weight="700" text-anchor="middle" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">2 m</text>';
+  h+='<text x="'+(36+2*scale)+'" y="'+(sbY+7)+'" font-size="11" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">Scale — 1 m = '+scale+' px</text>';
+  /* ---- footer lines ---- */
+  h+='<text x="30" y="'+(H-52)+'" font-size="11" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">Losses: trash '+loss.trash.toFixed(2)+' m · intake '+loss.intake.toFixed(2)+' m · friction '+loss.friction.toFixed(2)+' m · exit '+loss.exit.toFixed(2)+' m · total '+fmt(totLoss,2)+' m</text>';
+  h+='<text x="470" y="'+(H-52)+'" font-size="11" fill="#0a2540" style="paint-order:stroke;stroke:#fff;stroke-width:3px">Units needed: '+unitsRequired(t,c.qT)+(water?"":" · Channel empty, rotor stopped")+'</text>';
+  svg.innerHTML=h;
   var pn=$("plantNote");
-  if(pn) pn.textContent=(state.plantView==="cutaway"?"Cutaway — internal runner and draft tube shown.":"Side view — exterior of the plant.")+" "+t.name+", "+fmt(c.power.kw,1)+" kW at "+fmt(c.hNet,2)+" m net head.";
+  if(pn) pn.textContent=(cut?"Cutaway — internal runner, shaft, generator and draft tube shown.":"Side view — exterior of the plant; switch to Cutaway to see inside.")+" "+t.name+", "+fmt(c.power.kw,1)+" kW at "+fmt(c.hNet,2)+" m net head.";
   Array.prototype.forEach.call(document.querySelectorAll("[data-plantview]"), function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-plantview")===state.plantView ? "true" : "false"); });
 }
-
 function renderAll(){
   renderTop5(); renderDetail(); renderRanking();
 }
