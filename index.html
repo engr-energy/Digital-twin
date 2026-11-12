@@ -68,7 +68,18 @@ summary::marker{color:var(--teal)}
 .member b{font-size:16px;color:var(--navy)}
 .member .role{font-size:13px;color:var(--ink2)} .member{text-align:center;padding:20px 14px} .member .avatar{width:84px;height:84px;border-radius:50%;background:var(--teal);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
 .avatar.pick{cursor:pointer}
-.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block} .member.supervisor{border-top:4px solid var(--teal)} .member .affil{font-size:12px;color:var(--mut)}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.avatar{overflow:hidden}
+.upframe{height:220px;overflow:hidden;border-radius:10px}
+.upframe img{width:100%;height:100%;object-fit:cover;display:block}
+#photoEditor{position:fixed;inset:0;background:rgba(10,37,64,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.pe-box{background:#fff;border-radius:12px;padding:16px;max-width:440px;width:100%;max-height:90vh;overflow:auto}
+.pe-box h3{margin:0 0 10px}
+.pe-preview{height:220px;overflow:hidden;border-radius:10px;margin:0 auto 12px}
+.pe-preview.circle{width:180px;height:180px;border-radius:50%}
+.pe-preview img{width:100%;height:100%;display:block}
+.pe-box label{display:block;font-size:13px;font-weight:600;margin:8px 0}
+.pe-box input[type=range]{width:100%} .member.supervisor{border-top:4px solid var(--teal)} .member .affil{font-size:12px;color:var(--mut)}
 .comparewrap{overflow-x:auto}
 .comparewrap table{min-width:900px}
 .envbar{height:14px;background:#eef3f6;border:1px solid var(--line);border-radius:7px;position:relative;margin:4px 0 10px}
@@ -425,10 +436,11 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.8 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.9 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
+<div id="photoEditor" style="display:none" role="dialog" aria-label="Adjust photo"> <div class="pe-box"> <h3>Adjust photo</h3> <div class="pe-preview" id="pePreview"></div> <label>Zoom <input type="range" id="peZoom" min="1" max="2.5" step="0.05" value="1"></label> <label>Left - right <input type="range" id="peX" min="0" max="100" step="1" value="50"></label> <label>Up - down <input type="range" id="peY" min="0" max="100" step="1" value="50"></label> <p><button class="btn ghost" id="peFit" type="button">Fit whole photo</button> <button class="btn ghost" id="peRot" type="button">Rotate 90&deg;</button> <button class="btn ghost" id="peReset" type="button">Reset</button></p> <p><button class="btn" id="peDone" type="button">Done</button> <button class="btn ghost" id="peCancel" type="button">Cancel</button></p> </div> </div>
 <script>
 /* ===== Pure physics + data — no DOM here, so this block can be tested in Node ===== */
 "use strict";
@@ -565,21 +577,25 @@ function $(id){ return document.getElementById(id); }
 function on(id, ev, fn){ var el=$(id); if(el) el.addEventListener(ev, fn); }
 /* ---------- gallery photo upload (browser-only: localStorage) ---------- */
 var UPLOAD_KEY="fypUploadedPhotos_v1";
-function addUploadedFigure(src,cap,save){
+function addUploadedFigure(src,cap,save,settings){
   var g=$("gallery"); if(!g) return;
   var fig=document.createElement("figure"); fig.setAttribute("data-uploaded","1");
   var img=document.createElement("img"); img.src=src; img.alt=cap||"Uploaded site photo";
+  var frame=document.createElement("div"); frame.className="upframe"; frame.appendChild(img);
   var fc=document.createElement("figcaption"); fc.textContent=cap||"Uploaded photo";
   var rm=document.createElement("button"); rm.className="rmphoto"; rm.type="button"; rm.textContent="Remove";
   rm.addEventListener("click", function(){ fig.remove(); saveUploadedPhotos(); });
-  fig.appendChild(img); fig.appendChild(fc); fig.appendChild(rm); g.appendChild(fig);
+  var adj=document.createElement("button"); adj.className="rmphoto"; adj.type="button"; adj.textContent="Adjust";
+  adj.addEventListener("click", function(){ openPhotoEditor({kind:"gallery", src:img.src, img:img, circle:false, settings:fig._ps, apply:function(s){ fig._ps=s; applyPhotoStyle(img,s); saveUploadedPhotos(); }}); });
+  fig._ps=settings||defaultPhotoSettings(); applyPhotoStyle(img, fig._ps);
+  fig.appendChild(frame); fig.appendChild(fc); fig.appendChild(adj); fig.appendChild(rm); g.appendChild(fig);
   if(save) saveUploadedPhotos();
 }
 function saveUploadedPhotos(){
   try{
     var arr=[];
     Array.prototype.forEach.call(document.querySelectorAll("#gallery figure[data-uploaded]"), function(f){
-      arr.push({src:f.querySelector("img").src, cap:f.querySelector("figcaption").textContent});
+      arr.push({src:f.querySelector("img").src, cap:f.querySelector("figcaption").textContent, s:f._ps||defaultPhotoSettings()});
     });
     localStorage.setItem(UPLOAD_KEY, JSON.stringify(arr));
   }catch(e){
@@ -589,7 +605,7 @@ function saveUploadedPhotos(){
 function loadUploadedPhotos(){
   try{
     var raw=localStorage.getItem(UPLOAD_KEY); if(!raw) return;
-    JSON.parse(raw).forEach(function(p){ if(p&&p.src) addUploadedFigure(p.src, p.cap||"Uploaded photo", false); });
+    JSON.parse(raw).forEach(function(p){ if(p&&p.src) addUploadedFigure(p.src, p.cap||"Uploaded photo", false, p.s); });
   }catch(e){}
 }
 function downscalePhoto(file, done){
@@ -609,19 +625,26 @@ function downscalePhoto(file, done){
 }
 /* ---------- team photo upload (browser-only: localStorage) ---------- */
 var TEAM_KEY="fypTeamPhotos_v1", teamPhotoTarget=null;
-function setTeamPhoto(id, src, save){
+function setTeamPhoto(id, src, save, settings){
   var m=document.querySelector('.member[data-member="'+id+'"]'); if(!m) return;
   var av=m.querySelector(".avatar"); if(!av) return;
   if(src){
     av.innerHTML='<img src="'+src+'" alt="Photo of '+id+'">';
+    m._ps=settings||m._ps||defaultPhotoSettings(); applyPhotoStyle(av.querySelector("img"), m._ps);
     if(!m.querySelector(".rmteam")){
       var rm=document.createElement("button"); rm.className="rmphoto rmteam"; rm.type="button"; rm.textContent="Remove photo";
       rm.addEventListener("click", function(){ setTeamPhoto(id, null, true); });
       m.appendChild(rm);
     }
+    if(!m.querySelector(".adjteam")){
+      var ad=document.createElement("button"); ad.className="rmphoto adjteam"; ad.type="button"; ad.textContent="Adjust";
+      ad.addEventListener("click", function(){ openPhotoEditor({kind:"team", id:id, src:av.querySelector("img").src, img:av.querySelector("img"), circle:true, settings:m._ps, apply:function(s){ m._ps=s; applyPhotoStyle(m.querySelector(".avatar img"),s); saveTeamPhotos(); }}); });
+      m.appendChild(ad);
+    }
   }else{
     av.textContent=av.getAttribute("data-initials")||"";
     var old=m.querySelector(".rmteam"); if(old) old.remove();
+    var oldA=m.querySelector(".adjteam"); if(oldA) oldA.remove();
   }
   if(save) saveTeamPhotos();
 }
@@ -629,7 +652,7 @@ function saveTeamPhotos(){
   try{
     var obj={};
     Array.prototype.forEach.call(document.querySelectorAll(".member[data-member]"), function(m){
-      var img=m.querySelector(".avatar img"); if(img) obj[m.getAttribute("data-member")]=img.src;
+      var img=m.querySelector(".avatar img"); if(img) obj[m.getAttribute("data-member")]={src:img.src, s:m._ps||defaultPhotoSettings()};
     });
     localStorage.setItem(TEAM_KEY, JSON.stringify(obj));
   }catch(e){}
@@ -638,7 +661,7 @@ function loadTeamPhotos(){
   try{
     var raw=localStorage.getItem(TEAM_KEY); if(!raw) return;
     var obj=JSON.parse(raw);
-    Object.keys(obj).forEach(function(id){ if(obj[id]) setTeamPhoto(id, obj[id], false); });
+    Object.keys(obj).forEach(function(id){ var v=obj[id]; if(!v) return; if(typeof v==="string"){ setTeamPhoto(id, v, false); } else { setTeamPhoto(id, v.src, false, v.s); } });
   }catch(e){}
 }
 function squarePhoto(file, done){
@@ -655,6 +678,35 @@ function squarePhoto(file, done){
   };
   reader.readAsDataURL(file);
 }
+/* ---------- photo adjust editor ---------- */
+function defaultPhotoSettings(){ return {zoom:1, x:50, y:50, fit:"cover", rot:0}; }
+function applyPhotoStyle(img, s){
+  if(!img||!s) return;
+  img.style.objectFit=s.fit;
+  img.style.objectPosition=s.x+"% "+s.y+"%";
+  img.style.transform="scale("+s.zoom+") rotate("+s.rot+"deg)";
+}
+var peTarget=null, peSettings=null;
+function openPhotoEditor(target){
+  peTarget=target;
+  peSettings=target.settings?JSON.parse(JSON.stringify(target.settings)):defaultPhotoSettings();
+  var prev=$("pePreview");
+  prev.className="pe-preview"+(target.circle?" circle":"");
+  prev.innerHTML="";
+  var img=document.createElement("img"); img.src=target.src; img.alt="Preview";
+  prev.appendChild(img);
+  syncEditorControls();
+  $("photoEditor").style.display="flex";
+}
+function syncEditorControls(){
+  $("peZoom").value=peSettings.zoom;
+  $("peX").value=peSettings.x;
+  $("peY").value=peSettings.y;
+  $("peFit").textContent=peSettings.fit==="cover"?"Fit whole photo":"Fill frame";
+  var img=$("pePreview").querySelector("img");
+  if(img) applyPhotoStyle(img, peSettings);
+}
+function closePhotoEditor(){ $("photoEditor").style.display="none"; peTarget=null; }
 function lossTotal(){ var l=state.losses; return l.trash+l.intake+l.friction+l.exit; }
 /* ---------- per-fall unit of analysis ----------
    Each reach has ONE fall structure. Its gross head is editable per fall and is a
@@ -1328,7 +1380,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.8", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.9", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1361,7 +1413,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.8"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.9"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1438,7 +1490,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.8)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.9)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1828,6 +1880,14 @@ function init(){
     this.value="";
   });
   loadTeamPhotos();
+  on("peZoom","input", function(){ peSettings.zoom=parseFloat(this.value); syncEditorControls(); });
+  on("peX","input", function(){ peSettings.x=parseFloat(this.value); syncEditorControls(); });
+  on("peY","input", function(){ peSettings.y=parseFloat(this.value); syncEditorControls(); });
+  on("peFit","click", function(){ peSettings.fit=peSettings.fit==="cover"?"contain":"cover"; syncEditorControls(); });
+  on("peRot","click", function(){ peSettings.rot=(peSettings.rot+90)%360; syncEditorControls(); });
+  on("peReset","click", function(){ peSettings=defaultPhotoSettings(); syncEditorControls(); });
+  on("peDone","click", function(){ if(peTarget&&peTarget.apply) peTarget.apply(peSettings); closePhotoEditor(); });
+  on("peCancel","click", function(){ closePhotoEditor(); });
 }
 if (typeof document !== "undefined"){ init(); }
 </script>
