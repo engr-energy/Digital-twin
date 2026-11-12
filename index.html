@@ -150,7 +150,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="stats">21 falls &middot; 2 canal systems &middot; 7 turbine types</p>
 <div class="datastrip" style="background:#14385e;border-color:#2c5a7a;color:#fff"><b style="color:var(--amber)">Data status — provisional ranking:</b> fall heads are placeholders (2.5 m) &middot; flows are planning estimates &middot; costs are indicative. No measured head or gauge data yet — see Method and limitations.</div>
 <p class="cta"><a href="#rankH">View ranking</a><a class="ghost" href="#repH">Download report</a><a class="ghost" href="#calcH">Method and limitations</a></p>
-<p class="team"><b>Supervisor:</b> Prof. Dr. Farid Ullah Khan &nbsp;·&nbsp; <b>Group:</b> M. Umar Shah &middot; M. Ismail &middot; Abdul Majid</p>
+<p class="team"><b>Supervisor:</b> Prof. Dr. Farid Ullah Khan &nbsp;·&nbsp; <b>Group:</b> M. Ismail &middot; M. Umar Shah &middot; Abdul Majid</p>
 </div>
 </header>
 
@@ -406,8 +406,8 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="small">Final-year project group, BS Energy Engineering, UET Peshawar — 2026.</p>
 <div class="teamblock">
 <div class="member supervisor"><div class="avatar">FK</div><b>Prof. Dr. Farid Ullah Khan</b><div class="role">Project Supervisor</div><div class="affil">USPCAS-E, UET Peshawar</div></div>
-<div class="member"><div class="avatar">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
 <div class="member"><div class="avatar">MI</div><b>M. Ismail</b><div class="role">Decision-Support Tool Development &amp; UI/UX</div></div>
+<div class="member"><div class="avatar">US</div><b>M. Umar Shah</b><div class="role">Hydraulic Modelling &amp; Data Collection</div></div>
 <div class="member"><div class="avatar">AM</div><b>Abdul Majid</b><div class="role">Economic Analysis &amp; Turbine Selection</div></div>
 </div>
 </section>
@@ -423,7 +423,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.6 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.7 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -1278,7 +1278,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.6", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.7", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1311,7 +1311,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.6"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.7"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1388,7 +1388,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.6)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.7)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1405,7 +1405,7 @@ function fillPrintReport(r){
   h+="<h2>Assumptions</h2><table><tr><th>Input</th><th>Badge</th><th>Basis</th></tr>";
   r.assumptions.forEach(function(a){ h+="<tr><td>"+a[0]+"</td><td>"+a[1]+"</td><td>"+a[2]+"</td></tr>"; });
   h+="</table><h2>Limitations</h2><ul>"+r.limitations.map(function(x){ return "<li>"+x+"</li>"; }).join("")+"</ul>";
-  h+="<p>FYP group: M. Umar Shah, M. Ismail, Abdul Majid · Supervisor: Prof. Dr. Farid Ullah Khan · UET Peshawar.</p>";
+  h+="<p>FYP group: M. Ismail, M. Umar Shah, Abdul Majid · Supervisor: Prof. Dr. Farid Ullah Khan · UET Peshawar.</p>";
   $("printReport").innerHTML=h;
 }
 
