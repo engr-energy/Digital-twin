@@ -382,7 +382,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <li>Lengths in this tool are in <b>feet</b>, not metres (Lower Swat Main 148,000 ft = 45.1 km; Kabul River Canal 198,000 ft = 60.4 km). Lengths are shown in km with the ft value beside them.</li>
 <li>ML status: no trained Random Forest or Isolation Forest yet — see the ML module status panel. The proposal's ML modules will only be trained on measured data, with cross-validation.</li>
 <li>Totals across reaches are not shown — branches reuse the same water, so reaches are not additive. Use the Top 5 list instead.</li>
-<li>Bed-level profile is schematic (datum 100, not surveyed) — real geometry needs a QGIS GeoJSON export.</li>
+<li>Longitudinal profile (in the downloadable report) is schematic (datum 100, not surveyed) — real geometry needs a QGIS GeoJSON export.</li>
 </ul>
 </section>
 
@@ -422,7 +422,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.3 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.4 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -536,7 +536,7 @@ function autoSuggest(hNet, qDesignVal, monthlyRange, units){
     if (lcoe<bestLCOE){ second=best; secondLCOE=bestLCOE; bestLCOE=lcoe; best=t; }
     else if (lcoe<secondLCOE){ second=t; secondLCOE=lcoe; }
   });
-  var r = "Auto-suggested " + best.name + " — lowest estimated LCOE (" + bestLCOE.toFixed(1) + " PKR/kWh) among the " + eligible.length + " families that fit, at planning costs and a 0.55 screening capacity factor. Peak efficiency alone is not the criterion — cost per kWh is. Estimates: " + lcoeList.join("; ") + "." + (second ? " Runner-up " + second.name + " is " + Math.round((secondLCOE/bestLCOE-1)*100) + "% higher (" + secondLCOE.toFixed(1) + " PKR/kWh)." : "");
+  var r = "Auto-suggested " + best.name + " — lowest estimated LCOE (" + bestLCOE.toFixed(1) + " PKR/kWh) among the " + (eligible.length===1 ? "1 family that fits" : eligible.length + " families that fit") + ", at planning costs and a 0.55 screening capacity factor. Peak efficiency alone is not the criterion — cost per kWh is. Estimates: " + lcoeList.join("; ") + "." + (second ? " Runner-up " + second.name + " is " + Math.round((secondLCOE/bestLCOE-1)*100) + "% higher (" + secondLCOE.toFixed(1) + " PKR/kWh)." : "");
   if (monthlyRange && monthlyRange > 2.5) r += " Monthly flow range is over 2.5:1, so a flat-curve machine (Kaplan / screw / crossflow) or two units is favoured.";
   if (rejected.length) r += " Rejected here: " + rejected.slice(0,3).join("; ") + ".";
   return {turb:best, reason:r};
@@ -786,8 +786,7 @@ function renderDetail(){
   $("fitTitle").textContent=v.title;
   $("fitWhy").textContent=v.why;
   $("fitBest").textContent=v.best;
-  /* curve table + chart */
-  $("c20").textContent=fmt(t.curve[0],2); $("c40").textContent=fmt(t.curve[1],2); $("c60").textContent=fmt(t.curve[2],2); $("c80").textContent=fmt(t.curve[3],2); $("c100").textContent=fmt(t.curve[4],2);
+  /* curve chart removed from the page in v4.3 (now in the downloadable report); drawCurve is a no-op without its svg */
   drawCurve(t,c);
   drawProfile();
   drawMonthly(c);
@@ -1223,7 +1222,7 @@ function limitationsList(){
     "Lengths in this tool are in feet, not metres (Lower Swat Main 148,000 ft = 45.1 km; Kabul River Canal 198,000 ft = 60.4 km).",
     "ML status: no trained Random Forest or Isolation Forest yet — see the ML module status panel; the proposal's ML modules will only be trained on measured data, with cross-validation.",
     "Totals across reaches are not shown — branches reuse the same water, so reaches are not additive. Use the Top 5 list instead.",
-    "Bed-level profile is schematic (datum 100, not surveyed) — real geometry needs a QGIS GeoJSON export."
+    "Longitudinal profile (in the downloadable report) is schematic (datum 100, not surveyed) — real geometry needs a QGIS GeoJSON export."
   ];
 }
 function collectReport(){
@@ -1233,7 +1232,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.3", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.4", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1266,7 +1265,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.3"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.4"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1343,7 +1342,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.3)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.4)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
