@@ -147,7 +147,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="lede">Compares 21 canal falls on the Lower Swat and Kabul River systems by power, annual energy and cost, across seven turbine types.</p>
 <p class="stats">21 falls &middot; 2 canal systems &middot; 7 turbine types</p>
 <div class="datastrip" style="background:#14385e;border-color:#2c5a7a;color:#fff"><b style="color:var(--amber)">Data status — provisional ranking:</b> fall heads are placeholders (2.5 m) &middot; flows are planning estimates &middot; costs are indicative. No measured head or gauge data yet — see Method and limitations.</div>
-<p class="cta"><a href="#rankH">View ranking</a><a class="ghost" href="#calcH">Method and limitations</a></p>
+<p class="cta"><a href="#rankH">View ranking</a><a class="ghost" href="#repH">Download report</a><a class="ghost" href="#calcH">Method and limitations</a></p>
 <p class="team"><b>Supervisor:</b> Prof. Dr. Farid Ullah Khan &nbsp;·&nbsp; <b>Group:</b> M. Umar Shah &middot; M. Ismail &middot; Abdul Majid</p>
 </div>
 </header>
@@ -288,9 +288,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <tr><th>Capacity factor (computed)</th><td class="num"><span id="dCF">—</span></td></tr>
 <tr><th>Gross / losses / net head</th><td class="num"><span id="dGross">—</span> / <span id="dLosses">—</span> / <span id="dNet">—</span> m</td></tr>
 </table>
-<h3>Efficiency curve &eta;(Q) — selected turbine</h3>
-<svg id="curveSvg" width="100%" height="180" viewBox="0 0 460 180" role="img" aria-label="Efficiency curve chart"></svg>
-<table id="curveTable"><tr><th>Flow % of design</th><th class="num">20</th><th class="num">40</th><th class="num">60</th><th class="num">80</th><th class="num">100</th></tr><tr><td>&eta; (typical shape)</td><td class="num" id="c20">—</td><td class="num" id="c40">—</td><td class="num" id="c60">—</td><td class="num" id="c80">—</td><td class="num" id="c100">—</td></tr></table>
+
 </div>
 </div>
 </section>
@@ -309,12 +307,12 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="small"><b>Schematic — not a site drawing.</b> The scene is driven by the tool: gross and net head set the fall height and water levels, flow sets the water and rotor speed, and the selected turbine, generator and draft tube change the machine. Until measured heads replace the placeholders, this is an illustration of the layout, not a surveyed plant.</p>
 <p><button class="btn ghost" data-plantview="side" aria-pressed="true">Side view</button> <button class="btn ghost" data-plantview="cutaway" aria-pressed="false">Cutaway</button> <span class="small" id="plantNote"></span></p>
 <svg id="plantSvg" width="100%" height="380" viewBox="0 0 960 380" role="img" aria-label="Schematic plant view: canal, intake, turbine chamber, generator house, draft tube and tailrace"></svg>
-<p class="small">Scale bar: bottom left of the drawing (1 m = 55 px); the dimension lines on the right are in metres (gross and net head). Water is shown at the current flow percentage; at 0% (canal closure) the channel is empty and the rotor stops. Works offline — no external library is loaded; if the browser cannot draw SVG, the turbine-geometry diagram below is the fallback.</p>
+<p class="small">Scale bar: bottom left of the drawing (1 m = 55 px); the dimension lines on the right are in metres (gross and net head). Water is shown at the current flow percentage; at 0% (canal closure) the channel is empty and the rotor stops. Works offline — no external library is loaded.</p>
 </section>
 
 <section class="panel geo" aria-labelledby="geoH">
-<h2 id="geoH">Turbine geometry — in the plant</h2>
-<p>Change a component and the diagram and the result change with it.</p>
+<h2 id="geoH">Plant components — intake, generator, draft tube</h2>
+<p>Change a component and the result changes with it. The table below identifies the selected turbine family.</p>
 <div class="comps">
 <div class="comp"><label for="intakeSel">Intake</label>
 <select id="intakeSel"><option value="trash">Trash rack</option><option value="gated">Gated intake</option><option value="open">Open channel</option></select>
@@ -326,18 +324,12 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <select id="draftSel"><option value="elbow">Elbow draft tube</option><option value="straight">Straight draft tube</option><option value="none">None (screw / wheel)</option></select>
 <div class="small" id="draftNote">Elbow: exit loss 0.05 m. Straight: 0.03 m. None: 0.00 m.</div></div>
 </div>
-<svg id="geoSvg" viewBox="0 0 560 260" width="100%" role="img" aria-label="Turbine geometry diagram"></svg>
-<p class="small" id="geoNote">—</p>
+
 <table><tbody id="geoBody"></tbody></table>
-<p class="small">Geometry is typical — not a site drawing and not a supplier drawing. Head values on the diagram are the current head.</p>
+<p class="small">Runner and head-range values are typical for the family — not a site drawing and not a supplier drawing.</p>
 </section>
 
-<section class="panel route" aria-labelledby="mapH">
-<h2 id="mapH">Longitudinal profile — bed level against chainage</h2>
-<p class="small">Schematic profile, not surveyed. Bed level is drawn from a datum of 100 and drops by each fall's net head in chainage order — a shape to read the falls against, not a surveyed level. Real geometry must come from a QGIS GeoJSON export. Chainage comes from the reach off-take notes and lengths in the progress-report tables; where no RD is stated, the fall is marked "RD — to be confirmed". Click a fall to select it.</p>
-<svg id="mapSvg" width="100%" height="300" viewBox="0 0 640 300" role="img" aria-label="Longitudinal profile of the canal with falls marked"></svg>
-<p class="small" id="mapNote">—</p>
-</section>
+
 
 <section class="panel" aria-labelledby="rankH">
 <h2 id="rankH">Fall ranking</h2>
@@ -346,9 +338,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <thead><tr><th class="num">#</th><th>Fall</th><th>System</th><th class="num">Design Q (m&sup3;/s)</th><th>Turbine</th><th class="num">Net head (m)</th><th class="num">Power (kW)</th><th class="num">Energy (MWh/yr)</th><th>Status</th><th>Action</th></tr></thead>
 <tbody id="rankBody"></tbody>
 </table>
-<h3>Monthly energy — selected reach</h3>
-<svg id="monthSvg" width="100%" height="180" viewBox="0 0 640 180" role="img" aria-label="Monthly energy chart"></svg>
-<p class="small" id="monthNote">—</p>
+
 </section>
 
 <section class="panel" aria-labelledby="ecoH">
@@ -382,9 +372,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </section>
 
 <section class="panel" aria-labelledby="calcH">
-<h2 id="calcH">How this is calculated</h2>
-<p class="small">Power at one operating point: P = 9.81 &times; Q &times; H net &times; &eta; turbine(Q) &times; &eta; generator. H net = gross head at the fall &minus; losses (trash rack + intake + friction + exit). Annual energy: monthly flow factors &times; (days in month &minus; closure days) &times; 24 &times; 0.95 availability, with flow capped at the turbine design flow. Design flow: Q50 / Q60 / Q70 of the monthly flow-duration curve, or full canal discharge. Economics: capital = rated kW &times; cost per kW, where cost per kW = base &times; (rated &divide; 100)<sup>&minus;exponent</sup> for the turbine family (planning estimate). LCOE = (capital &times; CRF + O&amp;M) &divide; annual kWh. NPV and IRR use the annual net cash flow over the project life at the discount rate.</p>
-<h3>Limitations — read before you cite a number</h3>
+<h2 id="calcH">How this is calculated</h2> <details><summary>Method in brief — how the numbers are calculated</summary><p class="small">Power at one operating point: P = 9.81 &times; Q &times; H net &times; &eta; turbine(Q) &times; &eta; generator. H net = gross head at the fall &minus; losses (trash rack + intake + friction + exit). Annual energy: monthly flow factors &times; (days in month &minus; closure days) &times; 24 &times; 0.95 availability, with flow capped at the turbine design flow. Design flow: Q50 / Q60 / Q70 of the monthly flow-duration curve, or full canal discharge. Economics: capital = rated kW &times; cost per kW, where cost per kW = base &times; (rated &divide; 100)<sup>&minus;exponent</sup> for the turbine family (planning estimate). LCOE = (capital &times; CRF + O&amp;M) &divide; annual kWh. NPV and IRR use the annual net cash flow over the project life at the discount rate.</p></details> <h3>Limitations — read before you cite a number</h3>
 <ul>
 <li>Fall heads are placeholders (2.5 m) — no measured head per fall yet. Ranking follows head &times; flow, so it changes when real heads arrive.</li>
 <li>No gauge data yet — monthly factors and closure days are planning estimates per canal.</li>
@@ -434,7 +422,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.2 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.3 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -835,7 +823,8 @@ function renderTornado(){
   tb.innerHTML=html;
 }
 function drawCurve(t,c){
-  var svg=$("curveSvg"), W=460,H=180, pad=34;
+  var svg=$("curveSvg"); if(!svg) return;
+  var W=460,H=180, pad=34;
   var pts=[[0.20,t.curve[0]],[0.40,t.curve[1]],[0.60,t.curve[2]],[0.80,t.curve[3]],[1.00,t.curve[4]]];
   function X(r){ return pad + r*(W-2*pad); } function Y(e){ return H-pad - (e-0.3)/(1.0-0.3)*(H-2*pad); }
   var d="M "+pts.map(function(p){ return X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1); }).join(" L ");
@@ -869,7 +858,8 @@ function chainageKm(s, sites){
   return cum/3280.84;
 }
 function drawProfile(){
-  var svg=$("mapSvg"), W=640, H=300;
+  var svg=$("mapSvg"); if(!svg) return;
+  var W=640, H=300;
   var systems = state.sys==="all" ? ["swat","kabul"] : [state.sys];
   var html='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#eef3f6"/>';
   var rows = {swat:{y0:60, col:"#006d7a", label:"Lower Swat Canal"}, kabul:{y0:200, col:"#7a4a12", label:"Kabul River Canal"}};
@@ -915,7 +905,8 @@ function drawProfile(){
   $("mapNote").textContent="Selected: "+fi.name+" — "+fi.rd+", Q "+fmt(c.qD,2)+" m³/s, net head "+fmt(c.hNet,2)+" m, "+c.turb.name+". Bed level is schematic (datum 100, not surveyed); real geometry must come from a QGIS GeoJSON export.";
 }
 function drawMonthly(c){
-  var svg=$("monthSvg"), W=640,H=180, pad=30;
+  var svg=$("monthSvg"); var cl0=closureFor(siteById(state.selected).sys); var totClos0=cl0.reduce(function(a,b){return a+b;},0); var ms0=$("monthSummary"); if(ms0) ms0.textContent="Closure total: "+totClos0+" days/yr · Mean flow factor: "+fmt(factorsFor(siteById(state.selected).sys).reduce(function(a,b){return a+b;},0)/12,2); if(!svg) return;
+  var W=640,H=180, pad=30;
   var mx=Math.max.apply(null,c.monthly.concat([1]));
   var bw=(W-2*pad)/12;
   var html='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#eef3f6"/>';
@@ -1111,8 +1102,8 @@ function geoMachine(id){
 }
 function drawGeometry(t,c,s){
   var g=GEO[t.id]||GEO.kaplan;
-  $("geoSvg").innerHTML=geoFrame(fmt(fallGross(s),2), fmt(c.hNet,2))+geoMachine(t.id);
-  $("geoNote").textContent=t.name+" — "+g.tell;
+  var gs=$("geoSvg"); if(gs) gs.innerHTML=geoFrame(fmt(fallGross(s),2), fmt(c.hNet,2))+geoMachine(t.id);
+  var gn=$("geoNote"); if(gn) gn.textContent=t.name+" — "+g.tell;
   $("geoBody").innerHTML='<tr><th>Flow direction</th><td>'+g.flow+'</td></tr>'
   +'<tr><th>Runner orientation</th><td>'+g.orient+'</td></tr>'
   +'<tr><th>Blades / flights (typical)</th><td>'+g.blades+'</td></tr>'
@@ -1242,7 +1233,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.2", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.3", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1275,7 +1266,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.3"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1352,7 +1343,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.3)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1362,6 +1353,10 @@ function fillPrintReport(r){
   h+="<tr><th>Annual energy</th><td>"+s.annualMWh+" MWh/yr</td><th>Capacity factor</th><td>"+s.capacityFactorPct+"%</td></tr>";
   h+="<tr><th>Status</th><td>"+s.status+"</td><th>Design discharge</th><td>"+s.designM3s+" m³/s ("+s.designCusecs+" cusecs)</td></tr>";
   h+="<tr><th>Payback</th><td>"+s.paybackYr+" yr</td><th>LCOE (CRF)</th><td>"+s.lcoePKRkWh+" PKR/kWh</td></tr></table>";
+  h+="<h2>Monthly energy — selected fall (MWh)</h2><table><tr>"+MONTHS.map(function(m){ return "<th>"+m+"</th>"; }).join("")+"</tr><tr>"+r.selected.monthlyMWh.map(function(v){ return "<td>"+v+"</td>"; }).join("")+"</tr></table><p>Monthly factors and closure days are planning estimates per canal, not gauge data.</p>";
+  var tb=null; TURBINES.forEach(function(x){ if(x.name===s.turbine) tb=x; });
+  if(tb){ h+="<h2>Efficiency curve — "+s.turbine+" (typical screening curve)</h2><table><tr><th>Flow % of design</th><th>20</th><th>40</th><th>60</th><th>80</th><th>100</th></tr><tr><td>η (typical shape)</td>"+[0.2,0.4,0.6,0.8,1.0].map(function(f){ return "<td>"+etaAt(tb,f).toFixed(2)+"</td>"; }).join("")+"</tr></table><p>Typical screening curve for the family, not a measured curve for this site.</p>"; }
+  h+="<h2>Longitudinal profile — schematic</h2><p>Bed level from a datum of 100, dropping by each fall's net head in chainage order. Schematic, not surveyed — real geometry needs a QGIS GeoJSON export.</p><table><tr><th>Fall</th><th>Chainage (RD)</th><th>Net head (m)</th></tr>"+r.falls.map(function(x){ return "<tr><td>"+x.name+"</td><td>"+(x.chainage||"—")+"</td><td>"+x.netHeadM+"</td></tr>"; }).join("")+"</table>";
   h+="<h2>Assumptions</h2><table><tr><th>Input</th><th>Badge</th><th>Basis</th></tr>";
   r.assumptions.forEach(function(a){ h+="<tr><td>"+a[0]+"</td><td>"+a[1]+"</td><td>"+a[2]+"</td></tr>"; });
   h+="</table><h2>Limitations</h2><ul>"+r.limitations.map(function(x){ return "<li>"+x+"</li>"; }).join("")+"</ul>";
