@@ -436,11 +436,11 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.9 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.10 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
-<div id="photoEditor" style="display:none" role="dialog" aria-label="Adjust photo"> <div class="pe-box"> <h3>Adjust photo</h3> <div class="pe-preview" id="pePreview"></div> <label>Zoom <input type="range" id="peZoom" min="1" max="2.5" step="0.05" value="1"></label> <label>Left - right <input type="range" id="peX" min="0" max="100" step="1" value="50"></label> <label>Up - down <input type="range" id="peY" min="0" max="100" step="1" value="50"></label> <p><button class="btn ghost" id="peFit" type="button">Fit whole photo</button> <button class="btn ghost" id="peRot" type="button">Rotate 90&deg;</button> <button class="btn ghost" id="peReset" type="button">Reset</button></p> <p><button class="btn" id="peDone" type="button">Done</button> <button class="btn ghost" id="peCancel" type="button">Cancel</button></p> </div> </div>
+<div id="photoEditor" style="display:none" role="dialog" aria-label="Adjust photo"> <div class="pe-box"> <h3>Adjust photo</h3> <div class="pe-preview" id="pePreview"></div> <p class="small">Tip: zoom in a little, then use Left-right and Up-down to choose which part of the photo shows in the frame.</p> <label>Zoom <input type="range" id="peZoom" min="1" max="2.5" step="0.05" value="1"></label> <label>Left - right <input type="range" id="peX" min="0" max="100" step="1" value="50"></label> <label>Up - down <input type="range" id="peY" min="0" max="100" step="1" value="50"></label> <p><button class="btn ghost" id="peFit" type="button">Fit whole photo</button> <button class="btn ghost" id="peRot" type="button">Rotate 90&deg;</button> <button class="btn ghost" id="peReset" type="button">Reset</button></p> <p><button class="btn" id="peDone" type="button">Done</button> <button class="btn ghost" id="peCancel" type="button">Cancel</button></p> </div> </div>
 <script>
 /* ===== Pure physics + data — no DOM here, so this block can be tested in Node ===== */
 "use strict";
@@ -664,27 +664,25 @@ function loadTeamPhotos(){
     Object.keys(obj).forEach(function(id){ var v=obj[id]; if(!v) return; if(typeof v==="string"){ setTeamPhoto(id, v, false); } else { setTeamPhoto(id, v.src, false, v.s); } });
   }catch(e){}
 }
-function squarePhoto(file, done){
-  var reader=new FileReader();
-  reader.onload=function(){
-    var img=new Image();
-    img.onload=function(){
-      var s=Math.min(img.width, img.height), sx=Math.round((img.width-s)/2), sy=Math.round((img.height-s)/2);
-      var cv=document.createElement("canvas"); cv.width=400; cv.height=400;
-      cv.getContext("2d").drawImage(img, sx, sy, s, s, 0, 0, 400, 400);
-      done(cv.toDataURL("image/jpeg",0.85));
-    };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(file);
-}
+/* team photos now keep their aspect (downscalePhoto) so Left-right / Up-down have room to move */
 /* ---------- photo adjust editor ---------- */
 function defaultPhotoSettings(){ return {zoom:1, x:50, y:50, fit:"cover", rot:0}; }
+function photoOverflow(img, s){
+  var bw=img.clientWidth||0, bh=img.clientHeight||0;
+  if(!bw||!bh) return {mx:0, my:0};
+  var iw=img.naturalWidth||bw, ih=img.naturalHeight||bh;
+  var fitScale = s.fit==="contain" ? Math.min(bw/iw, bh/ih) : Math.max(bw/iw, bh/ih);
+  var rw=iw*fitScale*s.zoom, rh=ih*fitScale*s.zoom;
+  if(s.rot%180!==0){ var tmp=rw; rw=rh; rh=tmp; }
+  return {mx:Math.abs(rw-bw)/2, my:Math.abs(rh-bh)/2};
+}
 function applyPhotoStyle(img, s){
   if(!img||!s) return;
   img.style.objectFit=s.fit;
-  img.style.objectPosition=s.x+"% "+s.y+"%";
-  img.style.transform="scale("+s.zoom+") rotate("+s.rot+"deg)";
+  img.style.objectPosition="50% 50%";
+  var o=photoOverflow(img, s);
+  var tx=(s.x-50)/50*o.mx, ty=(s.y-50)/50*o.my;
+  img.style.transform="translate("+tx.toFixed(1)+"px,"+ty.toFixed(1)+"px) scale("+s.zoom+") rotate("+s.rot+"deg)";
 }
 var peTarget=null, peSettings=null;
 function openPhotoEditor(target){
@@ -694,6 +692,7 @@ function openPhotoEditor(target){
   prev.className="pe-preview"+(target.circle?" circle":"");
   prev.innerHTML="";
   var img=document.createElement("img"); img.src=target.src; img.alt="Preview";
+  img.onload=function(){ syncEditorControls(); };
   prev.appendChild(img);
   syncEditorControls();
   $("photoEditor").style.display="flex";
@@ -1380,7 +1379,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.9", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.10", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1413,7 +1412,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.9"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.10"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1490,7 +1489,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.9)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.10)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1876,13 +1875,23 @@ function init(){
   on("teamPhotoInput","change", function(){
     var files=this.files; if(!files||!files.length||!teamPhotoTarget) return;
     var f=files[0], id=teamPhotoTarget;
-    if(f.type&&f.type.indexOf("image/")===0){ squarePhoto(f, function(url){ setTeamPhoto(id, url, true); }); }
+    if(f.type&&f.type.indexOf("image/")===0){ downscalePhoto(f, function(url){ setTeamPhoto(id, url, true); }); }
     this.value="";
   });
   loadTeamPhotos();
   on("peZoom","input", function(){ peSettings.zoom=parseFloat(this.value); syncEditorControls(); });
-  on("peX","input", function(){ peSettings.x=parseFloat(this.value); syncEditorControls(); });
-  on("peY","input", function(){ peSettings.y=parseFloat(this.value); syncEditorControls(); });
+  on("peX","input", function(){
+    peSettings.x=parseFloat(this.value);
+    var img=$("pePreview").querySelector("img");
+    if(img && peSettings.zoom===1 && photoOverflow(img, peSettings).mx===0){ peSettings.zoom=1.25; }
+    syncEditorControls();
+  });
+  on("peY","input", function(){
+    peSettings.y=parseFloat(this.value);
+    var img=$("pePreview").querySelector("img");
+    if(img && peSettings.zoom===1 && photoOverflow(img, peSettings).my===0){ peSettings.zoom=1.25; }
+    syncEditorControls();
+  });
   on("peFit","click", function(){ peSettings.fit=peSettings.fit==="cover"?"contain":"cover"; syncEditorControls(); });
   on("peRot","click", function(){ peSettings.rot=(peSettings.rot+90)%360; syncEditorControls(); });
   on("peReset","click", function(){ peSettings=defaultPhotoSettings(); syncEditorControls(); });
