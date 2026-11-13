@@ -161,7 +161,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="kicker">Final-Year Project &middot; BS Energy Engineering &middot; UET Peshawar</p>
 <h1>Low-Head Hydropower Screening for KP Irrigation Canals</h1>
 <p class="stats">21 falls &middot; 2 canal systems &middot; 7 turbine types</p>
-<p class="cta"><a href="#rankH">View ranking</a><a class="ghost" href="#repH">Download report</a><a class="ghost" href="#calcH">Method and limitations</a></p>
+<p class="cta"><a href="#rankH">View ranking</a><a class="ghost" href="#repH">Download report</a><a class="ghost" href="#calcH">Method</a></p>
 </div>
 </header>
 
@@ -191,23 +191,23 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <h3>Top 5 — where should we build? <span class="badge as">Provisional ranking</span></h3>
 <p class="small"><b>Provisional:</b> every fall still uses a 2.5 m placeholder head, so this ranking is effectively flow-only. It will change when measured heads arrive. Kabul River Main Canal (kr1) is excluded from the Top 5 until its length and CCA are verified — see the flag in the ranking table.</p>
 <table><thead><tr><th class="num">#</th><th>Fall</th><th class="num">Power (kW)</th><th class="num">Energy (MWh/yr)</th><th>Turbine</th><th>Verdict</th></tr></thead><tbody id="top5Body"></tbody></table>
-<p class="small">Verdicts: Build = passes screening and the suitability score is 75 or more. Possible = passes screening, score 50–74. Check = fails screening or the score is below 50.</p>
+<p class="small">Verdicts: FIT = passes screening. NOT FIT = fails screening, or the fall is vetoed for irrigation.</p>
 </section>
 
 <section class="panel" aria-labelledby="ctrlH">
 <h2 id="ctrlH">Controls — head, flow, season</h2>
 <div class="livestrip" id="liveStrip">Selected fall: — &middot; Power: — &middot; Energy: — &middot; <span class="prov">Provisional — placeholder heads</span></div>
-<p class="legend">Data status: <span class="badge me">Measured</span> verified against a source &nbsp; <span class="badge as">Assumed</span> planning estimate &nbsp; <span class="badge ph">Placeholder</span> to be replaced by measurement &nbsp; <span class="badge" style="background:#e9eef2;color:#4a6478;border:1px solid #b9cbd8">Reported</span> from a department table, not yet field-checked</p>
+<p class="legend">Data status: <span class="badge me">Measured</span> verified against a source &nbsp; <span class="badge" style="background:#e9eef2;color:#4a6478;border:1px solid #b9cbd8">Reported</span> from a department table, not yet field-checked</p>
 <div class="grid2">
 <div>
 <h3>Fall head — this fall only</h3>
-<label class="f" for="inFallHead">Gross head at this fall (m) <span class="badge ph">Placeholder — replace with measured head</span></label>
+<label class="f" for="inFallHead">Gross head at this fall (m)</label>
 <input type="number" id="inFallHead" min="0" max="5" step="0.1" value="2.5" />
 <p class="small">This head applies to the selected fall only. Changing it moves only this fall's power — other falls are unchanged. Heads are placeholders (2.5 m) until a measured head replaces them.</p>
 <label class="f" for="inShift">Head sensitivity — shift ALL falls by <span id="shiftVal">0.0 m</span></label>
 <input type="range" id="inShift" min="-1" max="1" step="0.1" value="0" />
 <p class="small">Sensitivity override only — it shifts every fall's head by the same amount, to test how much the answer depends on the placeholder heads. It is not a measurement.</p>
-<label class="f">Losses (m) — editable <span class="badge as">Assumed</span></label>
+<label class="f">Losses (m) — editable</label>
 <div class="grid3">
 <div><label class="f" for="lossTrash">Trash rack</label><input type="number" id="lossTrash" min="0" max="0.4" step="0.01" value="0.10" /></div>
 <div><label class="f" for="lossIntake">Intake / entrance</label><input type="number" id="lossIntake" min="0" max="0.2" step="0.01" value="0.05" /></div>
@@ -239,7 +239,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <p class="small">Generator &eta; is set in the plant panel below. Two units: flow is split across the units, so two units never give less than one.</p>
 </div>
 </div>
-<details><summary><b>Advanced — monthly flow factors and closure days</b> <span class="badge as">Assumed</span></summary>
+<details><summary><b>Advanced — monthly flow factors and closure days</b></summary>
 <p class="small">Planning estimates per canal — replace with Irrigation Department gauge data and the release/closure schedule.</p>
 <h4>Lower Swat</h4>
 <div class="monthgrid" id="monthGridSwat"></div>
@@ -260,18 +260,10 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </section>
 
 <section class="panel" aria-labelledby="cmpH">
-<h2 id="cmpH">Turbine comparison — all seven families at this fall</h2>
-<p class="small">One column per family, at the units each family needs to pass the design flow. <b>Best value in each row is highlighted.</b> Families needing more than 2 units are marked Marginal — a single fall is not normally built with 3+ units. Qualitative rows (civil works, debris, fish, maintenance, footprint) are typical literature values for orientation only — confirm with supplier data before using them in the report. Costs are the tool's own planning estimates, not quotations.</p>
-<div class="comparewrap"><table><thead><tr id="compareHead"><th>Family</th></tr></thead><tbody id="compareBody"></tbody></table></div>
-<p class="small" id="compareNote"></p>
-<h3>Operating envelopes — head and flow</h3>
-<div id="envelopeBody"></div>
-<h3>Efficiency against flow — all seven families</h3>
-<svg id="compareCurveSvg" width="100%" height="220" viewBox="0 0 640 220" role="img" aria-label="Efficiency curves for all seven turbine families"></svg>
-<p class="small">Part-load behaviour matters: flow swings between Rabi and Kharif, so a family with a flat curve keeps its efficiency when flow drops. The selected family is drawn in its colour; the others are grey.</p>
-<h3>Compare mode — pick two or three families</h3>
-<p class="small">Click a family name in the table above to add it to the comparison (max 3). The table below shows the difference against the lowest LCOE in the set.</p>
-<div class="comparewrap"><table><thead><tr><th>Family</th><th class="num">Power (kW)</th><th class="num">Energy (MWh/yr)</th><th class="num">LCOE (PKR/kWh)</th><th class="num">Δ LCOE vs best</th></tr></thead><tbody id="compareSetBody"><tr><td colspan="5">No families selected yet — click a family name above.</td></tr></tbody></table></div>
+<h2 id="cmpH">Turbine efficiency against flow — all seven families</h2>
+<p class="small">Part-load behaviour matters: flow swings between Rabi and Kharif, so a family with a flat curve keeps its efficiency when flow drops. The selected family is drawn thicker; every family keeps its own colour.</p>
+<svg id="compareCurveSvg" width="100%" height="250" viewBox="0 0 640 250" role="img" aria-label="Efficiency curves for all seven turbine families"></svg>
+<div class="small" id="compareLegend"></div>
 </section>
 
 <section class="panel" aria-labelledby="detH">
@@ -317,14 +309,6 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div>
 </section>
 
-<section class="panel" aria-labelledby="valH">
-<h2 id="valH">Measured data — validation, suitability and anomaly check</h2>
-<div class="mlstatus" id="mlStatus"><b>ML module status — proposal vs page (reconciled).</b> The FYP proposal commits to two ML modules: (1) Random Forest for site suitability and power prediction, (2) Isolation Forest for anomaly detection. <b>Status today: neither is trained.</b> The suitability score below is a transparent rule score (baseline, /100) and the anomaly check is a simple median/MAD check on uploaded measured data only. A Random Forest trained on 21 sites with placeholder heads and no measured power would be statistically weak — it will only be trained after field data arrives (measured head and power, 5 Dec 2026 plan), with cross-validation, feature importance and honest limits reported. The Isolation Forest will only run on a measured operating history. Until then, no trained model is claimed anywhere on this page.</div>
-<p>Upload a CSV of measured data (columns: date, flow m&sup3;/s, power kW) for the selected fall. The model is compared against the measurement — this is the calibration step the proposal promises. Nothing is uploaded to a server; the file stays in your browser.</p>
-<p><input type="file" id="csvFile" accept=".csv" /> <span class="small" id="csvStatus">No measured data loaded — the model is uncalibrated.</span></p>
-<div id="validBody"><p>Upload measured flow and power (CSV: date, flow m&sup3;/s, power kW) to compare the model against measurement. Until then there is nothing to validate against — the model is uncalibrated.</p></div>
-<div id="mlBody"></div>
-</section>
 
 <section class="panel" aria-labelledby="plantH">
 <h2 id="plantH">Plant view — schematic</h2>
@@ -367,10 +351,10 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 <h2 id="ecoH">Economics — selected reach</h2>
 <p class="small">Type a value — every number below updates at once. Costs are planning estimates by turbine type and size (power law: cost per kW rises as the plant shrinks) — confirm with supplier quotes. Formulas: LCOE = (capital &times; CRF + annual O&amp;M) &divide; annual kWh, where CRF = r(1+r)&#8319; &divide; ((1+r)&#8319; &minus; 1). NPV = &minus;capital + &Sigma; annual net cash &divide; (1+r)&#8347;. IRR is the discount rate that makes NPV zero. Payback = capital ÷ (annual value − annual O&M).</p> <p class="small"><b>Sources &amp; assumptions:</b> the tariff values used here — 22 PKR/kWh (sale to grid) and 38 PKR/kWh (self-consumption) — and the 10% discount rate are planning assumptions, not quotations from a NEPRA tariff determination or the State Bank of Pakistan policy rate. Confirm the current tariff and discount rate before citing them in the report.</p>
 <div class="grid3">
-<div><label class="f" for="costFactor">Cost factor (&times; planning estimate) <span class="badge as">Assumed</span></label><input type="number" id="costFactor" min="0.2" max="3" step="0.1" value="1" /></div>
-<div><label class="f" for="omPct">O&amp;M (% of capital / yr) <span class="badge as">Assumed</span></label><input type="number" id="omPct" min="0" max="10" step="0.5" value="2" /></div>
-<div><label class="f" for="tariffSel">Tariff scenario <span class="badge as">Assumed</span></label><select id="tariffSel"><option value="sale" selected>Sale to grid — 22 PKR/kWh</option><option value="self">Self-consumption — 38 PKR/kWh</option></select></div>
-<div><label class="f" for="energyValue">Energy value (PKR/kWh) <span class="badge as">Assumed</span></label><input type="number" id="energyValue" min="0" step="1" value="22" /></div>
+<div><label class="f" for="costFactor">Cost factor (&times; planning estimate)</label><input type="number" id="costFactor" min="0.2" max="3" step="0.1" value="1" /></div>
+<div><label class="f" for="omPct">O&amp;M (% of capital / yr)</label><input type="number" id="omPct" min="0" max="10" step="0.5" value="2" /></div>
+<div><label class="f" for="tariffSel">Tariff scenario</label><select id="tariffSel"><option value="sale" selected>Sale to grid — 22 PKR/kWh</option><option value="self">Self-consumption — 38 PKR/kWh</option></select></div>
+<div><label class="f" for="energyValue">Energy value (PKR/kWh)</label><input type="number" id="energyValue" min="0" step="1" value="22" /></div>
 <div><label class="f" for="lifeYears">Life (years)</label><input type="number" id="lifeYears" min="1" max="50" step="1" value="25" /></div>
 <div><label class="f" for="discountRate">Discount rate (% / yr)</label><input type="number" id="discountRate" min="0" max="25" step="0.5" value="10" /></div>
 </div>
@@ -394,19 +378,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </section>
 
 <section class="panel" aria-labelledby="calcH">
-<h2 id="calcH">How this is calculated</h2> <details><summary>Method in brief — how the numbers are calculated</summary><p class="small">Power at one operating point: P = 9.81 &times; Q &times; H net &times; &eta; turbine(Q) &times; &eta; generator. H net = gross head at the fall &minus; losses (trash rack + intake + friction + exit). Annual energy: monthly flow factors &times; (days in month &minus; closure days) &times; 24 &times; 0.95 availability, with flow capped at the turbine design flow. Design flow: Q50 / Q60 / Q70 of the monthly flow-duration curve, or full canal discharge. Economics: capital = rated kW &times; cost per kW, where cost per kW = base &times; (rated &divide; 100)<sup>&minus;exponent</sup> for the turbine family (planning estimate). LCOE = (capital &times; CRF + O&amp;M) &divide; annual kWh. NPV and IRR use the annual net cash flow over the project life at the discount rate.</p></details> <h3>Limitations — read before you cite a number</h3>
-<ul>
-<li>Fall heads are placeholders (2.5 m) — no measured head per fall yet. Ranking follows head &times; flow, so it changes when real heads arrive.</li>
-<li>No gauge data yet — monthly factors and closure days are planning estimates per canal.</li>
-<li>Costs are planning estimates by turbine type and size — not quotations. Confirm with supplier quotes.</li>
-<li>No trained machine-learning model — suitability is a transparent rule score and the anomaly check is a simple median/MAD check, both active only with uploaded measured data.</li>
-<li>Kabul River Main Canal (kr1): the stored “length” 1,500 is not a length — it is the offtake RD (1,500 ft). CCA is missing. kr1 is excluded from the Top 5 until length and CCA are verified against the progress report.</li>
-<li>Lengths in this tool are in <b>feet</b>, not metres (Lower Swat Main 148,000 ft = 45.1 km; Kabul River Canal 198,000 ft = 60.4 km). Lengths are shown in km with the ft value beside them.</li>
-<li>ML status: no trained Random Forest or Isolation Forest yet — see the ML module status panel. The proposal's ML modules will only be trained on measured data, with cross-validation.</li>
-<li>Totals across reaches are not shown — branches reuse the same water, so reaches are not additive. Use the Top 5 list instead.</li>
-<li>Longitudinal profile (in the downloadable report) is schematic (datum 100, not surveyed) — real geometry needs a QGIS GeoJSON export.</li>
-</ul>
-</section>
+<h2 id="calcH">How this is calculated</h2> <details><summary>Method in brief — how the numbers are calculated</summary><p class="small">Power at one operating point: P = 9.81 &times; Q &times; H net &times; &eta; turbine(Q) &times; &eta; generator. H net = gross head at the fall &minus; losses (trash rack + intake + friction + exit). Annual energy: monthly flow factors &times; (days in month &minus; closure days) &times; 24 &times; 0.95 availability, with flow capped at the turbine design flow. Design flow: Q50 / Q60 / Q70 of the monthly flow-duration curve, or full canal discharge. Economics: capital = rated kW &times; cost per kW, where cost per kW = base &times; (rated &divide; 100)<sup>&minus;exponent</sup> for the turbine family (planning estimate). LCOE = (capital &times; CRF + O&amp;M) &divide; annual kWh. NPV and IRR use the annual net cash flow over the project life at the discount rate.</p></details></section>
 
 <section class="panel" aria-labelledby="repH">
 <h2 id="repH">Download report — this test</h2>
@@ -432,7 +404,7 @@ footer{color:var(--mut);font-size:13px;margin-top:24px}
 </div> <div class="uploadbox"> <button class="btn" id="btnAddPhoto" type="button">Add photo</button> <input type="file" id="photoInput" accept="image/*" multiple hidden> <span class="small" id="uploadNote">Photos you add here are saved in this browser only, so they stay when you reopen the page. To make a photo visible to everyone who opens the link, send it to the team to add to the page.</span> </div> </section>
 
 <footer>
-<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.17 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen. Hero photo: Upper Swat Canal weir, by Salman Rashid.</p>
+<p>Hydropower Site Selection &amp; Simulation Framework (Digital Twin Prototype) v4.18 — FYP, BS Energy Engineering, UET Peshawar. P = 9.81 &times; Q &times; H net &times; &eta;(Q) &times; &eta; gen. Hero photo: Upper Swat Canal weir, by Salman Rashid.</p>
 </footer>
 </div>
 <div id="printReport" aria-hidden="true"></div>
@@ -563,7 +535,7 @@ var state = { sys:"swat", selected:"ls1",
   factorsSwat:DEF_FACTORS.slice(), closureSwat:DEF_CLOSURE.slice(),
   factorsKabul:DEF_FACTORS.slice(), closureKabul:DEF_CLOSURE.slice(),
   designPct:60,
-  turb:{}, manual:{}, units:{}, vetoes:{}, vetoReason:{}, plantView:"side", compareSet:[],
+  turb:{}, manual:{}, units:{}, vetoes:{}, vetoReason:{}, plantView:"side",
   tariffMode:"sale", tariffValue:22, costFactor:1,
   omPct:2, lifeYears:25, discountRate:10,
   genEta:0.94, genType:"sync", intakeType:"trash", draftType:"elbow",
@@ -984,7 +956,6 @@ function renderDetail(){
   Array.prototype.forEach.call(document.querySelectorAll("[data-flow]"), function(b){ b.setAttribute("aria-pressed", parseInt(b.getAttribute("data-flow"),10)===state.flowPct ? "true" : "false"); });
   var ls=$("liveStrip");
   if (ls){ var e2=economics(c); ls.innerHTML="<b>"+fi.name+"</b> — "+fmt(c.power.kw,1)+" kW · "+fmt(c.annual,1)+" MWh/yr"+(e2?" · LCOE "+fmt(e2.lcoe,1)+" PKR/kWh":"")+" · "+c.turb.name+" · <span class=\"prov\">Provisional — placeholder heads</span>"; }
-  renderValidation();
 }
 function renderTornado(){
   var tb=$("tornadoBody"); if(!tb) return;
@@ -1293,18 +1264,6 @@ function drawGeometry(t,c,s){
    and the anomaly check is a median/MAD robust z-score. A trained Random Forest
    needs a labelled dataset of built/not-built sites, and a trained Isolation
    Forest needs a large measured operating history — neither exists yet. */
-function parseMeasuredCSV(text){
-  var lines=text.split(/\r?\n/), rows=[];
-  for (var i=0;i<lines.length;i++){
-    var line=lines[i].trim(); if(!line) continue;
-    var parts=line.split(",");
-    if (parts.length<3) continue;
-    var fl=parseFloat(parts[1]), pw=parseFloat(parts[2]);
-    if (isNaN(fl)||isNaN(pw)) continue; /* skips the header row */
-    rows.push({date:parts[0].trim(), flow:fl, power:pw});
-  }
-  return rows;
-}
 function validateMeasured(){
   if (!state.measured || !state.measured.length) return null;
   var s=siteById(state.selected), c=compute(s), t=c.turb, units=c.units;
@@ -1344,28 +1303,6 @@ function suitabilityScore(s, c){
   var verdict = score>=75?"Build — strong candidate":(score>=50?"Possible — check the weak points first":"Weak — do not build on this evidence");
   return {score:Math.round(score), parts:parts, verdict:verdict};
 }
-function renderValidation(){
-  var vb=$("validBody"); if(!vb) return;
-  var v=validateMeasured();
-  if (!v){ vb.innerHTML='<p>Upload measured flow and power (CSV: date, flow m³/s, power kW) to compare the model against measurement. Until then there is nothing to validate against — the model is uncalibrated.</p>'; }
-  else {
-    var verdict = v.mape<20 ? "Model agrees with measurement within "+v.mape.toFixed(1)+"% (mean absolute error) — acceptable for screening." : "Model disagrees with measurement by "+v.mape.toFixed(1)+"% — check the fall head and the turbine curve before trusting this fall.";
-    var rows=v.rows.map(function(r){ return '<tr><td>'+r.date+'</td><td class="num">'+fmt(r.flow,2)+'</td><td class="num">'+fmt(r.meas,1)+'</td><td class="num">'+fmt(r.model,1)+'</td><td class="num">'+fmt(r.res,1)+'</td></tr>'; }).join("");
-    vb.innerHTML='<p><b>'+v.n+' measured rows.</b> Mean absolute percentage error (MAPE): <b>'+v.mape.toFixed(1)+'%</b> · Bias (model − measured): <b>'+v.bias.toFixed(1)+'%</b>. '+verdict+'</p>'
-      +'<table><thead><tr><th>Date</th><th class="num">Flow (m³/s)</th><th class="num">Measured (kW)</th><th class="num">Model (kW)</th><th class="num">Model − measured</th></tr></thead><tbody>'+rows+'</tbody></table>';
-  }
-  var mb=$("mlBody"); if(!mb) return;
-  var s=siteById(state.selected), c=compute(s), sc=suitabilityScore(s,c);
-  var ml='<h3>Suitability score — transparent rule score, NOT a trained Random Forest</h3>'
-    +'<p><b>'+sc.score+' / 100 — '+sc.verdict+'.</b> '+sc.parts.join(" · ")+'. A trained Random Forest needs a labelled dataset of built and not-built sites; that dataset does not exist yet, so no trained model is claimed here.</p>';
-  if (v){
-    ml+='<h3>Anomaly check — simple median/MAD check, NOT a trained Isolation Forest</h3>'
-      +'<p>'+(v.flagged.length? v.flagged.length+' row(s) flagged as anomalies (|robust z| &gt; 3): '+v.flagged.map(function(r){return r.date+" (z "+r.z.toFixed(1)+")";}).join(", ")+'. Check the gauge record and the turbine on those dates.' : 'No anomalies flagged in the uploaded rows (|robust z| ≤ 3).')+' A trained Isolation Forest needs a large measured operating history; this is a simple check on the uploaded rows only.</p>';
-  } else {
-    ml+='<h3>Anomaly check — needs measured data</h3><p>Upload measured flow and power to run the anomaly check.</p>';
-  }
-  mb.innerHTML=ml;
-}
 
 /* ===== Report generation — current test, downloaded as .xls / .csv / PDF / .json ===== */
 function reportFileBase(){
@@ -1383,7 +1320,7 @@ function assumptionsList(){
     ["Costs", "Assumed", "Planning estimates by turbine type and size (power law) — confirm with supplier quotes."],
     ["Tariff ("+state.tariffMode+")", "Assumed", state.tariffValue+" PKR/kWh — planning assumption, no tariff source stated."],
     ["Design flow", "Assumed", state.designPct===100?"Full canal discharge (rarely realistic — Q60 recommended).":"Q"+state.designPct+" of the monthly flow-duration curve."],
-    ["Suitability / anomaly", "Not a trained model", "Transparent rule score and median/MAD check only — see the ML panel."]
+    ["Suitability / anomaly", "Not a trained model", "Transparent rule score and median/MAD check only — no trained model."]
   ];
 }
 function limitationsList(){
@@ -1406,7 +1343,7 @@ function collectReport(){
   var top5=topFive().map(function(r,i){ return {rank:i+1, name:r.s.name, powerKw:Math.round(r.c.power.kw*10)/10, annualMWh:Math.round(r.c.annual*10)/10, turbine:r.c.turb.name, status:r.c.status.label}; });
   var sc=suitabilityScore(s,c), v=validateMeasured();
   var falls=sysSites().map(function(x){ var cc=compute(x), ff=fallInfo(x); return {id:x.id, name:x.name, fall:ff.name, chainage:ff.rd, grossHeadM:Math.round(fallGross(x)*100)/100, netHeadM:Math.round(cc.hNet*100)/100, headBadge:"Placeholder"}; });
-  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.17", generated:new Date().toISOString(), scope:scope,
+  return { tool:"Hydropower Site Selection & Simulation Framework (Digital Twin Prototype) v4.18", generated:new Date().toISOString(), scope:scope,
     system: state.sys==="all"?"All systems — 21 falls":state.sys==="swat"?"Lower Swat":"Kabul River",
     condition:{ fallGrossHeadM:Math.round(c.fallGross*100)/100, headShiftM:state.headShift, lossesM:lossTotal(), trashM:state.losses.trash, intakeM:state.losses.intake, frictionM:state.losses.friction, exitM:state.losses.exit,
       netHeadM:Math.round(c.hNet*100)/100, flowPct:state.flowPct, designPct:state.designPct, designFlowM3s:Math.round(c.qT*100)/100, units:c.units,
@@ -1423,7 +1360,7 @@ function collectReport(){
       irrPct:e?(e.irr===null?null:(e.irr===Infinity?">500":Math.round(e.irr*1000)/10)):null,
       suitabilityScore:sc.score, suitabilityVerdict:sc.verdict,
       monthlyMWh:c.monthly.map(function(v){ return Math.round(v*10)/10; }) },
-    top5:top5, falls:falls,
+    top5:top5, falls:falls, turbineComparison:comparisonRows(s,c),
     ranking: rows.map(function(r,i){ return { rank:i+1, id:r.s.id, name:r.s.name, system:r.s.sys==="swat"?"Lower Swat":"Kabul River",
       designM3s:Math.round(r.c.qD*100)/100, turbine:r.c.turb.name, netHeadM:Math.round(r.c.hNet*100)/100,
       powerKw:r.c.status.cls==="bad"?0:Math.round(r.c.power.kw*10)/10, annualMWh:r.c.status.cls==="bad"?0:Math.round(r.c.annual*10)/10, status:r.c.status.label }; }),
@@ -1439,7 +1376,7 @@ function downloadBlob(filename, text, mime){
 function csvEsc(v){ v=(v===null||v===undefined)?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function buildCsv(r){
   var L=[];
-  L.push(["FYP Decision-Support Tool — test report","v4.17"]);
+  L.push(["FYP Decision-Support Tool — test report","v4.18"]);
   L.push(["Generated (UTC)", r.generated]);
   L.push(["System", r.system]); L.push(["Report covers", r.scope==="system"?"All falls in current system (ranking)":"Selected fall only"]);
   L.push([]);
@@ -1471,6 +1408,11 @@ function buildCsv(r){
   L.push(["Annual value (PKR/yr)", s.valuePKRyr]); L.push(["Simple payback (yr)", s.paybackYr]);
   L.push(["LCOE, CRF method (PKR/kWh)", s.lcoePKRkWh]); L.push(["NPV (PKR)", s.npvPKR]); L.push(["IRR (%)", s.irrPct]);
   L.push(["Monthly energy Jan-Dec (MWh)", s.monthlyMWh.join(" | ")]);
+  L.push([]);
+  L.push(["TURBINE COMPARISON — ALL SEVEN FAMILIES AT THIS FALL (at the units each family needs)"]);
+  L.push(["Family","Fit","Units required","Rated power (kW)","Annual energy (MWh/yr)","Efficiency at design flow","Efficiency at 60% flow","Capital cost (PKR)","LCOE (PKR/kWh)","NPV (PKR)","Payback (yr)","Civil-works complexity","Debris tolerance","Fish passage","Maintenance","Footprint"]);
+  (function(){ var b=r.turbineComparison.best; function star(v, bv){ if(v===null||v===undefined) return "—"; return (bv!==null && Math.abs(v-bv)<1e-9)? v+" ★" : v; }
+    r.turbineComparison.rows.forEach(function(x){ L.push([x.family, x.fit, x.units, star(x.rated,b.rated), star(x.annual,b.annual), star(x.etaDesign,b.etaDesign), star(x.eta60,b.eta60), star(x.cap,b.cap), star(x.lcoe,b.lcoe), star(x.npv,b.npv), star(x.payback,b.payback), x.civil, x.debris, x.fish, x.maint, x.footprint]); }); })();
   L.push([]);
   L.push(["FALLS — HEADS (all Placeholder until measured)"]);
   L.push(["Fall","Chainage","Gross head (m)","Net head (m)","Head badge"]);
@@ -1506,6 +1448,15 @@ function buildXls(r){
   h+=row(["Turbine", s.turbine])+row(["Turbine efficiency", s.etaTurb])+row(["Overall efficiency", s.etaTotal]);
   h+=row(["Power (kW)", s.powerKw])+row(["Annual energy (MWh/yr)", s.annualMWh])+row(["Annual range ±10% (MWh/yr)", s.annualRangeMWh.join(" – ")])+row(["Capacity factor (%)", s.capacityFactorPct])+row(["Status", s.status]);
   h+=row(["Capital (PKR)", s.capitalPKR])+row(["Civil / Electro / Grid (PKR)", s.civilPKR+" / "+s.electroPKR+" / "+s.gridPKR])+row(["Simple payback (yr)", s.paybackYr])+row(["LCOE, CRF method (PKR/kWh)", s.lcoePKRkWh])+row(["NPV (PKR)", s.npvPKR])+row(["IRR (%)", s.irrPct])+"</table>";
+  (function(){ var tc=r.turbineComparison, b=tc.best;
+    function cell(v, bv){ if(v===null||v===undefined) return "—"; return (bv!==null && Math.abs(v-bv)<1e-9)? v+" ★" : String(v); }
+    h+="<h2>Turbine comparison — all seven families at this fall</h2><table border=\"1\">"+row(["Family","Fit","Units","Rated (kW)","Energy (MWh/yr)","η design","η 60%","Capital (PKR)","LCOE (PKR/kWh)","NPV (PKR)","Payback (yr)"], true);
+    tc.rows.forEach(function(x){ h+=row([x.family, x.fit, x.units, cell(x.rated,b.rated), cell(x.annual,b.annual), cell(x.etaDesign,b.etaDesign), cell(x.eta60,b.eta60), cell(x.cap,b.cap), cell(x.lcoe,b.lcoe), cell(x.npv,b.npv), cell(x.payback,b.payback)]); });
+    h+="</table>";
+    h+="<h3>Turbine comparison — qualitative</h3><table border=\"1\">"+row(["Family","Civil works","Debris","Fish passage","Maintenance","Footprint"], true);
+    tc.rows.forEach(function(x){ h+=row([x.family, x.civil, x.debris, x.fish, x.maint, x.footprint]); });
+    h+="</table>";
+  })();
   h+="<h2>Ranking — current system (reaches are not additive)</h2><table border=\"1\">";
   h+=row(["Rank","Reach","System","Design flow (m³/s)","Turbine","Net head (m)","Power (kW)","Annual energy (MWh/yr)","Status"], true);
   r.ranking.forEach(function(x){ h+=row([x.rank, x.name, x.system, x.designM3s, x.turbine, x.netHeadM, x.powerKw, x.annualMWh, x.status]); });
@@ -1516,7 +1467,7 @@ function buildXls(r){
   return h;
 }
 function fillPrintReport(r){
-  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.17)</h1>";
+  var s=r.selected, h="<h1>FYP Decision-Support Tool — test report (v4.18)</h1>";
   h+="<p>Generated (UTC): "+s.fall+" · "+r.generated+" · System: "+r.system+"</p>";
   h+="<h2>Top 5 — where should we build?</h2><table><tr><th>Rank</th><th>Fall</th><th>Power (kW)</th><th>Energy (MWh/yr)</th><th>Status</th></tr>";
   r.top5.forEach(function(x){ h+="<tr><td>"+x.rank+"</td><td>"+x.name+"</td><td>"+x.powerKw+"</td><td>"+x.annualMWh+"</td><td>"+x.status+"</td></tr>"; });
@@ -1526,6 +1477,15 @@ function fillPrintReport(r){
   h+="<tr><th>Annual energy</th><td>"+s.annualMWh+" MWh/yr</td><th>Capacity factor</th><td>"+s.capacityFactorPct+"%</td></tr>";
   h+="<tr><th>Status</th><td>"+s.status+"</td><th>Design discharge</th><td>"+s.designM3s+" m³/s ("+s.designCusecs+" cusecs)</td></tr>";
   h+="<tr><th>Payback</th><td>"+s.paybackYr+" yr</td><th>LCOE (CRF)</th><td>"+s.lcoePKRkWh+" PKR/kWh</td></tr></table>";
+  (function(){ var tc=r.turbineComparison, b=tc.best;
+    function cell(v, bv){ if(v===null||v===undefined) return "—"; return (bv!==null && Math.abs(v-bv)<1e-9)? "<b>"+v+" ★</b>" : String(v); }
+    h+="<h2>Turbine comparison — all seven families at this fall</h2><table><tr><th>Family</th><th>Fit</th><th>Units</th><th>Rated (kW)</th><th>Energy (MWh/yr)</th><th>η design</th><th>η 60%</th><th>Capital (PKR)</th><th>LCOE (PKR/kWh)</th><th>NPV (PKR)</th><th>Payback (yr)</th></tr>";
+    tc.rows.forEach(function(x){ h+="<tr><td>"+x.family+"</td><td>"+x.fit+"</td><td>"+x.units+"</td><td>"+cell(x.rated,b.rated)+"</td><td>"+cell(x.annual,b.annual)+"</td><td>"+cell(x.etaDesign,b.etaDesign)+"</td><td>"+cell(x.eta60,b.eta60)+"</td><td>"+cell(x.cap,b.cap)+"</td><td>"+cell(x.lcoe,b.lcoe)+"</td><td>"+cell(x.npv,b.npv)+"</td><td>"+cell(x.payback,b.payback)+"</td></tr>"; });
+    h+="</table><p>One column per family, at the units each family needs to pass the design flow. ★ = best value in that column. Costs are planning estimates, not quotations.</p>";
+    h+="<h3>Turbine comparison — qualitative</h3><table><tr><th>Family</th><th>Civil works</th><th>Debris</th><th>Fish passage</th><th>Maintenance</th><th>Footprint</th></tr>";
+    tc.rows.forEach(function(x){ h+="<tr><td>"+x.family+"</td><td>"+x.civil+"</td><td>"+x.debris+"</td><td>"+x.fish+"</td><td>"+x.maint+"</td><td>"+x.footprint+"</td></tr>"; });
+    h+="</table><p>Qualitative rows are typical literature values for orientation only — confirm with supplier data before using them in the report.</p>";
+  })();
   h+="<h2>Monthly energy — selected fall (MWh)</h2><table><tr>"+MONTHS.map(function(m){ return "<th>"+m+"</th>"; }).join("")+"</tr><tr>"+r.selected.monthlyMWh.map(function(v){ return "<td>"+v+"</td>"; }).join("")+"</tr></table><p>Monthly factors and closure days are planning estimates per canal, not gauge data.</p>";
   var tb=null; TURBINES.forEach(function(x){ if(x.name===s.turbine) tb=x; });
   if(tb){ h+="<h2>Efficiency curve — "+s.turbine+" (typical screening curve)</h2><table><tr><th>Flow % of design</th><th>20</th><th>40</th><th>60</th><th>80</th><th>100</th></tr><tr><td>η (typical shape)</td>"+[0.2,0.4,0.6,0.8,1.0].map(function(f){ return "<td>"+etaAt(tb,f).toFixed(2)+"</td>"; }).join("")+"</tr></table><p>Typical screening curve for the family, not a measured curve for this site.</p>"; }
@@ -1548,92 +1508,50 @@ function familyCompute(t, qT, hn, s){
   var e=economics(c);
   return {req:req, units:units, gate:gate, rated:rated.kw, annual:annual, eco:e, etaDesign:etaAt(t,1.0), eta60:etaAt(t,0.6)};
 }
-function renderCompare(s,c){
-  var head=$("compareHead"), body=$("compareBody"), env=$("envelopeBody");
-  if(!head||!body) return;
+function comparisonRows(s,c){
   var rows=TURBINES.map(function(t){
     var f=familyCompute(t, c.qT, c.hNet, s);
     var fit = f.gate ? "Out of range" : (f.req>2 ? "Marginal — needs "+f.req+" units" : "Fits");
-    return {t:t, f:f, fit:fit};
+    return {family:t.name, fit:fit, units:f.req, rated:Math.round(f.rated*10)/10, annual:Math.round(f.annual*10)/10,
+      etaDesign:Math.round(f.etaDesign*100)/100, eta60:Math.round(f.eta60*100)/100,
+      cap:f.eco?Math.round(f.eco.cap):null, lcoe:f.eco?Math.round(f.eco.lcoe*10)/10:null,
+      npv:f.eco?Math.round(f.eco.npv):null, payback:(f.eco&&isFinite(f.eco.payback))?Math.round(f.eco.payback*10)/10:null,
+      civil:t.civil||"—", debris:t.debris||"—", fish:t.fish||"—", maint:t.maint||"—", footprint:t.footprint||"—"};
   });
-  function bestVal(list, fn, lower){ var vals=list.map(fn).filter(function(v){return isFinite(v);}); if(!vals.length) return null; return lower?Math.min.apply(null,vals):Math.max.apply(null,vals); }
-  var bRated=bestVal(rows,function(r){return r.f.rated;},false), bAnn=bestVal(rows,function(r){return r.f.annual;},false),
-      bEtaD=bestVal(rows,function(r){return r.f.etaDesign;},false), bEta6=bestVal(rows,function(r){return r.f.eta60;},false),
-      bCap=bestVal(rows,function(r){return r.f.eco?r.f.eco.cap:NaN;},true), bLcoe=bestVal(rows,function(r){return r.f.eco?r.f.eco.lcoe:NaN;},true),
-      bNpv=bestVal(rows,function(r){return r.f.eco?r.f.eco.npv:NaN;},false), bPay=bestVal(rows,function(r){return r.f.eco&&isFinite(r.f.eco.payback)?r.f.eco.payback:NaN;},true);
-  function num(v, d, best, lower){ if(!isFinite(v)) return "—"; var s2=fmt(v,d); return (best!==null && Math.abs(v-best)<1e-9) ? "<b>"+s2+" ★</b>" : s2; }
-  var html="<tr><th>Family</th>"+rows.map(function(r){ return '<th data-cmp="'+r.t.id+'" style="cursor:pointer"><span class="famdot" style="background:'+(r.t.color||"#006d7a")+'"></span>'+r.t.name+'</th>'; }).join("")+"</tr>";
-  head.innerHTML=html;
-  function rowHtml(label, fn){ return "<tr><th>"+label+"</th>"+rows.map(function(r){ return "<td class=\"num\">"+fn(r)+"</td>"; }).join("")+"</tr>"; }
-  var out="";
-  out+=rowHtml("Fit", function(r){ return r.fit; });
-  out+=rowHtml("Units required", function(r){ return r.f.req; });
-  out+=rowHtml("Rated power (kW)", function(r){ return num(r.f.rated,1,bRated,false); });
-  out+=rowHtml("Annual energy (MWh/yr)", function(r){ return num(r.f.annual,1,bAnn,false); });
-  out+=rowHtml("Efficiency at design flow", function(r){ return num(r.f.etaDesign,2,bEtaD,false); });
-  out+=rowHtml("Efficiency at 60% flow", function(r){ return num(r.f.eta60,2,bEta6,false); });
-  out+=rowHtml("Capital cost (PKR)", function(r){ return r.f.eco?num(r.f.eco.cap,0,bCap,true):"—"; });
-  out+=rowHtml("LCOE (PKR/kWh)", function(r){ return r.f.eco?num(r.f.eco.lcoe,1,bLcoe,true):"—"; });
-  out+=rowHtml("NPV (PKR)", function(r){ return r.f.eco?num(r.f.eco.npv,0,bNpv,false):"—"; });
-  out+=rowHtml("Payback (yr)", function(r){ return r.f.eco&&isFinite(r.f.eco.payback)?num(r.f.eco.payback,1,bPay,true):"—"; });
-  out+=rowHtml("Civil-works complexity", function(r){ return r.t.civil||"—"; });
-  out+=rowHtml("Debris tolerance", function(r){ return r.t.debris||"—"; });
-  out+=rowHtml("Fish passage", function(r){ return r.t.fish||"—"; });
-  out+=rowHtml("Maintenance", function(r){ return r.t.maint||"—"; });
-  out+=rowHtml("Footprint", function(r){ return r.t.footprint||"—"; });
-  body.innerHTML=out;
-  $("compareNote").textContent="★ = best value in that row. Rated power, energy and costs for a family are computed at the units it needs ("+rows.map(function(r){return r.t.name.split(",")[0]+": "+r.f.req;}).join(", ")+"). Design flow here: "+fmt(c.qT,2)+" m³/s at "+fmt(c.hNet,2)+" m net head.";
-  Array.prototype.forEach.call(head.querySelectorAll("[data-cmp]"), function(th){
-    th.addEventListener("click", function(){
-      var id=th.getAttribute("data-cmp"), i=state.compareSet.indexOf(id);
-      if(i>=0) state.compareSet.splice(i,1); else if(state.compareSet.length<3) state.compareSet.push(id);
-      renderCompareSet(s,c);
-    });
-  });
-  renderCompareSet(s,c);
-  /* envelopes */
-  var eh="";
-  rows.forEach(function(r){
-    var t=r.t, hPct=function(h){ return Math.max(0,Math.min(100,h/15*100)); }, fPct=function(q){ return Math.max(0,Math.min(100,q/60*100)); };
-    var hOut=c.hNet<t.hMin||c.hNet>t.hMax, fOut=c.qT<t.qMin||c.qT>t.qMax;
-    eh+='<div><b><span class="famdot" style="background:'+(t.color||"#006d7a")+'"></span>'+t.name+'</b> <span class="small">'+(hOut||fOut?"outside its envelope — greyed out":"inside its envelope")+'</span>'
-      +'<div class="envbar'+((hOut)?" out":"")+'"><div class="range" style="left:'+hPct(t.hMin)+'%;width:'+(hPct(t.hMax)-hPct(t.hMin))+'%"></div><div class="mark" style="left:'+hPct(c.hNet)+'%"></div></div>'
-      +'<div class="small">Head '+t.hMin.toFixed(1)+'–'+t.hMax+' m · this fall '+fmt(c.hNet,2)+' m (red mark)</div>'
-      +'<div class="envbar'+((fOut)?" out":"")+'"><div class="range" style="left:'+fPct(t.qMin)+'%;width:'+(fPct(Math.min(t.qMax,60))-fPct(t.qMin))+'%"></div><div class="mark" style="left:'+fPct(c.qT)+'%"></div></div>'
-      +'<div class="small">Flow '+t.qMin+'–'+(t.qMax>=999?">60":t.qMax)+' m³/s (bar capped at 60) · this fall '+fmt(c.qT,2)+' m³/s (red mark)</div></div>';
-  });
-  if(env) env.innerHTML=eh;
-  /* overlaid efficiency chart */
-  var svg=$("compareCurveSvg");
-  if(svg){
-    var W=640,H=220,pad=40, pts=[0.20,0.40,0.60,0.80,1.00];
-    function X(r2){ return pad+r2*(W-2*pad); } function Y(e){ return H-pad-(e-0.3)/0.7*(H-2*pad); }
-    var h2='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#eef3f6"/>'
-      +'<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="#0a2540" stroke-width="2"/>'
-      +'<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-pad)+'" stroke="#0a2540" stroke-width="2"/>'
-      +'<text x="'+(W/2)+'" y="'+(H-6)+'" font-size="11" text-anchor="middle">Flow — fraction of design</text>'
-      +'<text x="10" y="18" font-size="11">Efficiency η</text>';
-    TURBINES.forEach(function(t2){
-      var sel=t2.id===c.turb.id;
-      var d="M "+pts.map(function(p,i){ return X(p).toFixed(1)+" "+Y(t2.curve[i]).toFixed(1); }).join(" L ");
-      h2+='<path d="'+d+'" fill="none" stroke="'+(sel?(t2.color||"#006d7a"):"#b9cbd8")+'" stroke-width="'+(sel?3.5:1.5)+'"/>';
-      if(sel) h2+='<text x="'+(W-pad-4)+'" y="'+(Y(t2.curve[4])-8)+'" font-size="11" text-anchor="end" font-weight="700" fill="'+(t2.color||"#006d7a")+'">'+t2.name+'</text>';
-    });
-    svg.innerHTML=h2;
-  }
+  function best(fn, lower){ var vals=rows.map(fn).filter(function(v){ return v!==null && isFinite(v); }); if(!vals.length) return null; return lower?Math.min.apply(null,vals):Math.max.apply(null,vals); }
+  return {rows:rows, best:{rated:best(function(r){return r.rated;},false), annual:best(function(r){return r.annual;},false),
+    etaDesign:best(function(r){return r.etaDesign;},false), eta60:best(function(r){return r.eta60;},false),
+    cap:best(function(r){return r.cap;},true), lcoe:best(function(r){return r.lcoe;},true),
+    npv:best(function(r){return r.npv;},false), payback:best(function(r){return r.payback;},true)}};
 }
-function renderCompareSet(s,c){
-  var body=$("compareSetBody"); if(!body) return;
-  if(!state.compareSet.length){ body.innerHTML='<tr><td colspan="5">No families selected yet — click a family name above.</td></tr>'; return; }
-  var items=state.compareSet.map(function(id){
-    var t=turbById(id), f=familyCompute(t, c.qT, c.hNet, s);
-    return {t:t, f:f};
+function renderCompare(s,c){
+  var svg=$("compareCurveSvg"); if(!svg) return;
+  var W=640,H=250,padL=48,padR=16,padT=16,padB=46, pts=[0.20,0.40,0.60,0.80,1.00];
+  function X(r){ return padL+r*(W-padL-padR); }
+  function Y(e){ return (H-padB)-(e-0.3)/0.7*((H-padB)-padT); }
+  var h='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#f2f6f8"/>';
+  [0.4,0.5,0.6,0.7,0.8,0.9].forEach(function(g){
+    h+='<line x1="'+padL+'" y1="'+Y(g).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(g).toFixed(1)+'" stroke="#d7e2e8" stroke-width="1"/>';
+    h+='<text x="'+(padL-6)+'" y="'+(Y(g)+3.5).toFixed(1)+'" font-size="10" text-anchor="end" fill="#4a6478">'+g.toFixed(1)+'</text>';
   });
-  var bestL=Math.min.apply(null, items.map(function(x){ return x.f.eco?x.f.eco.lcoe:Infinity; }));
-  body.innerHTML=items.map(function(x){
-    var dL=x.f.eco?((x.f.eco.lcoe-bestL)/bestL*100):NaN;
-    return "<tr><td><span class=\"famdot\" style=\"background:"+(x.t.color||"#006d7a")+"\"></span>"+x.t.name+"</td><td class=\"num\">"+fmt(x.f.rated,1)+"</td><td class=\"num\">"+fmt(x.f.annual,1)+"</td><td class=\"num\">"+(x.f.eco?fmt(x.f.eco.lcoe,1):"—")+"</td><td class=\"num\">"+(isFinite(dL)?(dL===0?"best":"+ "+fmt(dL,0)+"%"):"—")+"</td></tr>";
-  }).join("");
+  pts.forEach(function(p){
+    h+='<line x1="'+X(p).toFixed(1)+'" y1="'+padT+'" x2="'+X(p).toFixed(1)+'" y2="'+(H-padB)+'" stroke="#e3ebef" stroke-width="1"/>';
+    h+='<text x="'+X(p).toFixed(1)+'" y="'+(H-padB+16)+'" font-size="10" text-anchor="middle" fill="#4a6478">'+Math.round(p*100)+'%</text>';
+  });
+  h+='<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="#0a2540" stroke-width="2"/>';
+  h+='<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(H-padB)+'" stroke="#0a2540" stroke-width="2"/>';
+  h+='<text x="'+((padL+W-padR)/2)+'" y="'+(H-8)+'" font-size="11" text-anchor="middle" fill="#0a2540">Flow — fraction of design</text>';
+  h+='<text x="12" y="18" font-size="11" fill="#0a2540">Efficiency \u03b7</text>';
+  TURBINES.forEach(function(t){
+    var sel=t.id===c.turb.id, col=t.color||"#006d7a";
+    var d="M "+pts.map(function(p,i){ return X(p).toFixed(1)+" "+Y(t.curve[i]).toFixed(1); }).join(" L ");
+    h+='<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+(sel?4:2)+'" stroke-linejoin="round" stroke-linecap="round"'+(sel?"":' opacity="0.85"')+'/>';
+    pts.forEach(function(p,i){ h+='<circle cx="'+X(p).toFixed(1)+'" cy="'+Y(t.curve[i]).toFixed(1)+'" r="'+(sel?3.5:2.5)+'" fill="'+col+'"/>'; });
+    if(sel) h+='<text x="'+(W-padR-4)+'" y="'+(Y(t.curve[4])-10)+'" font-size="11" text-anchor="end" font-weight="700" fill="'+col+'">'+t.name+'</text>';
+  });
+  svg.innerHTML=h;
+  var lg=$("compareLegend");
+  if(lg){ lg.innerHTML=TURBINES.map(function(t){ var sel=t.id===c.turb.id; return '<span style="'+(sel?"font-weight:700":"")+'"><span class="famdot" style="background:'+(t.color||"#006d7a")+'"></span>'+t.name+'</span>'; }).join(" &nbsp; "); }
 }
 /* ===== Plant view — interactive SVG schematic, no external library ===== */
 function drawPlant(s,c){
@@ -1853,13 +1771,6 @@ function init(){
   on("intakeSel","change", function(){ state.intakeType=this.value; applyIntake(); renderAll(); });
   on("genSel","change", function(){ state.genType=this.value; applyGen(); renderAll(); });
   on("draftSel","change", function(){ state.draftType=this.value; applyDraft(); renderAll(); });
-  /* measured-data CSV upload */
-  on("csvFile","change", function(){
-    var f=this.files && this.files[0]; if(!f) return;
-    var rd=new FileReader();
-    rd.onload=function(){ state.measured=parseMeasuredCSV(rd.result); $("csvStatus").textContent=state.measured.length+" measured rows loaded — validation and anomaly check updated for the selected fall."; renderAll(); };
-    rd.readAsText(f);
-  });
   /* report downloads */
   on("btnXls","click", function(){ var r=collectReport(); downloadBlob(reportFileBase()+".xls", buildXls(r), "application/vnd.ms-excel"); $("reportStatus").textContent="Excel (.xls) report downloaded: "+reportFileBase()+".xls — "+r.selected.fall+", "+r.selected.powerKw+" kW, "+r.selected.annualMWh+" MWh/yr."; });
   on("btnCsv","click", function(){ var r=collectReport(); downloadBlob(reportFileBase()+".csv", buildCsv(r), "text/csv"); $("reportStatus").textContent="Excel (.csv) report downloaded: "+reportFileBase()+".csv — "+r.selected.fall+", "+r.selected.powerKw+" kW, "+r.selected.annualMWh+" MWh/yr."; });
